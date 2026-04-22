@@ -2,18 +2,32 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search } from "lucide-react";
+import { Search, ExternalLink } from "lucide-react";
 import { SectionHeader } from "@/components/layout/SectionHeader";
 import { mockPacientes } from "@/lib/mock-data";
-import { Badge } from "@/components/ui/badge";
+
+function EstadoBadge({ estado }: { estado: string }) {
+  const isActivo = estado === "activo";
+  return (
+    <span
+      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
+        isActivo
+          ? "bg-green-50 text-green-700 border-green-200"
+          : "bg-gray-50 text-gray-500 border-gray-200"
+      }`}
+    >
+      {isActivo ? "Activo" : "Archivado"}
+    </span>
+  );
+}
 
 export default function PacientesPage() {
   const router = useRouter();
-  const [search, setSearch] = useState("");
-  const [filtro, setFiltro] = useState<"todos" | "activo" | "archivado">("todos");
+  const [search, setSearch]   = useState("");
+  const [filtro, setFiltro]   = useState<"todos" | "activo" | "archivado">("todos");
 
   const filtrados = mockPacientes.filter((p) => {
-    const texto = `${p.nombre} ${p.apellido} ${p.folio}`.toLowerCase();
+    const texto    = `${p.nombre} ${p.apellido} ${p.folio}`.toLowerCase();
     const coincide = search === "" || texto.includes(search.toLowerCase());
     const estado   = filtro === "todos" || p.estado === filtro;
     return coincide && estado;
@@ -23,7 +37,7 @@ export default function PacientesPage() {
     <div className="flex flex-col flex-1 min-h-0">
       <SectionHeader title="Pacientes" />
 
-      <div className="flex-1 p-5 min-h-0 overflow-auto">
+      <div className="flex-1 p-5 overflow-auto">
         {/* Toolbar */}
         <div className="bg-white rounded-xl shadow-sm p-4 mb-4 flex items-center gap-3">
           <div className="relative flex-1 max-w-sm">
@@ -40,7 +54,7 @@ export default function PacientesPage() {
               <button
                 key={f}
                 onClick={() => setFiltro(f)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-colors ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                   filtro === f
                     ? "bg-[#1E2A3A] text-white"
                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"
@@ -69,35 +83,31 @@ export default function PacientesPage() {
               {filtrados.map((p) => (
                 <tr
                   key={p.id}
-                  onClick={() => router.push(`/expedientes/${p.id}`)}
-                  className="border-b border-gray-50 hover:bg-blue-50/50 cursor-pointer transition-colors"
+                  className="border-b border-gray-50 hover:bg-sky-50/60 transition-colors"
                 >
-                  <td className="px-5 py-3 font-medium text-[#1E2A3A]">
+                  <td className="px-5 py-3.5 font-medium text-[#1E2A3A]">
                     {p.nombre} {p.apellido}
                   </td>
-                  <td className="px-5 py-3 text-gray-500 font-mono text-xs">{p.folio}</td>
-                  <td className="px-5 py-3 text-gray-500 text-xs">{p.fechaInicio}</td>
-                  <td className="px-5 py-3 text-gray-600 text-xs">{p.protocolo}</td>
-                  <td className="px-5 py-3">
-                    <Badge
-                      className={`text-xs ${
-                        p.estado === "activo"
-                          ? "bg-green-100 text-green-700 border-green-200"
-                          : "bg-gray-100 text-gray-500 border-gray-200"
-                      }`}
-                      variant="outline"
-                    >
-                      {p.estado}
-                    </Badge>
+                  <td className="px-5 py-3.5 text-gray-400 font-mono text-xs">{p.folio}</td>
+                  <td className="px-5 py-3.5 text-gray-500 text-xs">{p.fechaInicio}</td>
+                  <td className="px-5 py-3.5 text-gray-600 text-xs max-w-48 truncate">{p.protocolo}</td>
+                  <td className="px-5 py-3.5">
+                    <EstadoBadge estado={p.estado} />
                   </td>
-                  <td className="px-5 py-3 text-right">
-                    <span className="text-xs text-[#2563EB] underline underline-offset-2">ver expediente →</span>
+                  <td className="px-5 py-3.5 text-right">
+                    <button
+                      onClick={() => router.push(`/expedientes/${p.id}`)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#5BC8E8] hover:bg-[#3DAFD0] text-white text-xs font-medium transition-colors shadow-sm"
+                    >
+                      <ExternalLink size={12} />
+                      Ver expediente
+                    </button>
                   </td>
                 </tr>
               ))}
               {filtrados.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-5 py-8 text-center text-gray-400 text-sm">
+                  <td colSpan={6} className="px-5 py-10 text-center text-gray-400 text-sm">
                     No se encontraron pacientes.
                   </td>
                 </tr>

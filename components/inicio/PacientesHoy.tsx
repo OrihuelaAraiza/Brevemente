@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Users } from "lucide-react";
+import { Users, ChevronRight } from "lucide-react";
 import { mockCitasHoy } from "@/lib/mock-data";
 
 export function PacientesHoy() {
@@ -33,9 +33,9 @@ export function PacientesHoy() {
             </div>
             <Link
               href={`/expedientes/${cita.pacienteId}/sesiones`}
-              className="text-xs text-[#2563EB] underline underline-offset-2 hover:text-[#1D4ED8] flex-shrink-0 ml-2 whitespace-nowrap"
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#5BC8E8] hover:bg-[#3DAFD0] text-white text-xs font-medium transition-colors flex-shrink-0 ml-2"
             >
-              ver expediente →
+              Ver expediente <ChevronRight size={11} />
             </Link>
           </div>
         ))}

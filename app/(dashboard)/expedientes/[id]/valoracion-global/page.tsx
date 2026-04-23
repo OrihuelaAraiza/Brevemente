@@ -31,7 +31,13 @@ export default async function ValoracionGlobalPage({
   return (
     <div className="flex flex-col flex-1 min-h-0">
       <SectionHeader title="Expedientes - TX Psicoterapia TBE - VG" />
-      <ExpedienteSubHeader pacienteId={id} />
+      <ExpedienteSubHeader
+        pacienteId={id}
+        breadcrumbs={[
+          { label: "TX Psicoterapia TBE", href: `/expedientes/${id}/tx-psicoterapia` },
+          { label: "Valoración Global" },
+        ]}
+      />
 
       <div className="flex-1 overflow-auto p-5">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

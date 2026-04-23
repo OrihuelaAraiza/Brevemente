@@ -16,15 +16,38 @@ export function getCriterioColor(id: string): string {
 }
 
 // ─── Pacientes ───────────────────────────────────────────────────────────────
-export const mockPacientes = [
-  { id: "1", nombre: "Rosa María",  apellido: "Espinosa García",  folio: "247890", fechaInicio: "2025-02-01", protocolo: "Ataque de Pánico",              estado: "activo"    },
-  { id: "2", nombre: "Alberto",     apellido: "Gómez Sánchez",    folio: "247891", fechaInicio: "2025-03-15", protocolo: "Trastorno Depresivo tipo 1",     estado: "activo"    },
-  { id: "3", nombre: "Olga",        apellido: "Sánchez Ruíz",     folio: "247892", fechaInicio: "2025-01-10", protocolo: "Paranoia tipo 1",                estado: "activo"    },
-  { id: "4", nombre: "Mía",         apellido: "Vázquez Torres",   folio: "247893", fechaInicio: "2025-04-05", protocolo: "Trastorno Obsesivo",             estado: "activo"    },
-  { id: "5", nombre: "Martha",      apellido: "Ruíz Mendoza",     folio: "247894", fechaInicio: "2024-11-20", protocolo: "Trastorno Depresivo tipo 2",     estado: "activo"    },
-  { id: "6", nombre: "Carlos",      apellido: "Fuentes López",    folio: "247895", fechaInicio: "2025-02-28", protocolo: "Trastorno por Angustia",         estado: "archivado" },
-  { id: "7", nombre: "Elena",       apellido: "Morales Pérez",    folio: "247896", fechaInicio: "2024-09-15", protocolo: "Paranoia tipo 1",                estado: "archivado" },
-  { id: "8", nombre: "Fernando",    apellido: "Castro Ibáñez",    folio: "247897", fechaInicio: "2025-05-01", protocolo: "Ataque de Pánico",              estado: "activo"    },
+export type Paciente = {
+  id: string;
+  nombre: string;
+  apellido: string;
+  folio: string;
+  fechaInicio: string;
+  fechaElaboracion: string;
+  protocolo: string;
+  estado: "activo" | "archivado";
+  curp: string;
+  email: string;
+  telefono: string;
+  fechaNacimiento: string;
+  edad: number;
+  sexo: "Femenino" | "Masculino" | "Otro";
+  tipoTerapia: "Individual" | "Pareja" | "Familia" | "Infantil";
+  modalidad: "Presencial" | "Online" | "Mixta";
+  dx: string;
+  spr: string;
+  direccion: string;
+  ocupacion: string;
+};
+
+export const mockPacientes: Paciente[] = [
+  { id: "1", nombre: "Rosa María", apellido: "Espinosa García", folio: "247890", fechaInicio: "2025-02-01", fechaElaboracion: "2025-02-01", protocolo: "Ataque de Pánico",          estado: "activo",    curp: "EIGR850312MDFSPS04", email: "rosa.espinosa@mail.com",    telefono: "+52 555 234 5678", fechaNacimiento: "1985-03-12", edad: 41, sexo: "Femenino", tipoTerapia: "Individual", modalidad: "Presencial", dx: "Ataque de Pánico",              spr: "SPR Fóbico (FOB)",         direccion: "CDMX, México",         ocupacion: "Diseñadora"  },
+  { id: "2", nombre: "Alberto",    apellido: "Gómez Sánchez",   folio: "247891", fechaInicio: "2025-03-15", fechaElaboracion: "2025-03-15", protocolo: "Trastorno Depresivo tipo 1",  estado: "activo",    curp: "GOSA780915HDFLN02", email: "alberto.gomez@mail.com",    telefono: "+52 555 345 6789", fechaNacimiento: "1978-09-15", edad: 47, sexo: "Masculino", tipoTerapia: "Individual", modalidad: "Online",     dx: "Trastorno Depresivo tipo 1",     spr: "SPR Obsesivo (OBS)",      direccion: "Guadalajara, Jalisco", ocupacion: "Contador"    },
+  { id: "3", nombre: "Olga",       apellido: "Sánchez Ruíz",    folio: "247892", fechaInicio: "2025-01-10", fechaElaboracion: "2025-01-10", protocolo: "Paranoia tipo 1",             estado: "activo",    curp: "SARO900420MDFNZ07", email: "olga.sanchez@mail.com",     telefono: "+52 555 456 7890", fechaNacimiento: "1990-04-20", edad: 35, sexo: "Femenino", tipoTerapia: "Individual", modalidad: "Presencial", dx: "Paranoia tipo 1",                spr: "SPR Paranoico (PAR)",     direccion: "Monterrey, NL",        ocupacion: "Profesora"   },
+  { id: "4", nombre: "Mía",        apellido: "Vázquez Torres",  folio: "247893", fechaInicio: "2025-04-05", fechaElaboracion: "2025-04-05", protocolo: "Trastorno Obsesivo",          estado: "activo",    curp: "VATM950618MDFZMR08", email: "mia.vazquez@mail.com",      telefono: "+52 555 567 8901", fechaNacimiento: "1995-06-18", edad: 30, sexo: "Femenino", tipoTerapia: "Pareja",     modalidad: "Presencial", dx: "Trastorno Obsesivo Compulsivo",  spr: "SPR Obsesivo Compulsivo", direccion: "Puebla, Puebla",       ocupacion: "Ingeniera"   },
+  { id: "5", nombre: "Martha",     apellido: "Ruíz Mendoza",    folio: "247894", fechaInicio: "2024-11-20", fechaElaboracion: "2024-11-20", protocolo: "Trastorno Depresivo tipo 2",  estado: "activo",    curp: "RUMM700225MDFZND09", email: "martha.ruiz@mail.com",      telefono: "+52 555 678 9012", fechaNacimiento: "1970-02-25", edad: 55, sexo: "Femenino", tipoTerapia: "Individual", modalidad: "Mixta",      dx: "Trastorno Depresivo tipo 2",     spr: "SPR Obsesivo Fóbico (OF)", direccion: "CDMX, México",         ocupacion: "Abogada"     },
+  { id: "6", nombre: "Carlos",     apellido: "Fuentes López",   folio: "247895", fechaInicio: "2025-02-28", fechaElaboracion: "2025-02-28", protocolo: "Trastorno por Angustia",      estado: "archivado", curp: "FULC820730HDFNPR05", email: "carlos.fuentes@mail.com",   telefono: "+52 555 789 0123", fechaNacimiento: "1982-07-30", edad: 43, sexo: "Masculino", tipoTerapia: "Familia",    modalidad: "Presencial", dx: "Trastorno por Angustia",         spr: "SPR Fóbico Obsesivo (FO)", direccion: "Querétaro, Qro.",      ocupacion: "Comerciante" },
+  { id: "7", nombre: "Elena",      apellido: "Morales Pérez",   folio: "247896", fechaInicio: "2024-09-15", fechaElaboracion: "2024-09-15", protocolo: "Paranoia tipo 1",             estado: "archivado", curp: "MOPE881105MDFRRL03", email: "elena.morales@mail.com",    telefono: "+52 555 890 1234", fechaNacimiento: "1988-11-05", edad: 37, sexo: "Femenino", tipoTerapia: "Individual", modalidad: "Online",     dx: "Paranoia tipo 1",                spr: "SPR Paranoico (PAR)",     direccion: "Mérida, Yucatán",      ocupacion: "Psicóloga"   },
+  { id: "8", nombre: "Fernando",   apellido: "Castro Ibáñez",   folio: "247897", fechaInicio: "2025-05-01", fechaElaboracion: "2025-05-01", protocolo: "Ataque de Pánico",            estado: "activo",    curp: "CAIF920810HDFSBR06", email: "fernando.castro@mail.com",  telefono: "+52 555 901 2345", fechaNacimiento: "1992-08-10", edad: 33, sexo: "Masculino", tipoTerapia: "Individual", modalidad: "Presencial", dx: "Ataque de Pánico",              spr: "SPR Fóbico (FOB)",         direccion: "Tijuana, BC",          ocupacion: "Arquitecto"  },
 ];
 
 // ─── Citas del día (para Dashboard) ─────────────────────────────────────────

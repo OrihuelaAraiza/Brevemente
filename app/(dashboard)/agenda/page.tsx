@@ -26,6 +26,7 @@ export default function AgendaPage() {
     <div className="flex flex-col flex-1 min-h-0">
       <SectionHeader
         title="Agenda"
+        titleClassName="text-4xl"
         subtitle="Gestiona expedientes cumpliendo con NOM-004/NOM-024. La búsqueda se actualiza automáticamente."
         right={
           <div className="flex items-center gap-2">
@@ -41,6 +42,7 @@ export default function AgendaPage() {
           </div>
         }
       />
+      <div className="h-2 bg-[#1E2A3A]" />
 
       <div className="flex-1 flex flex-col p-5 min-h-0">
         {/* Crear cita button */}

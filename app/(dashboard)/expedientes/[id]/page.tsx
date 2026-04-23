@@ -13,7 +13,8 @@ const secciones = [
 export default function ExpedienteSeleccionPage({ params }: { params: { id: string } }) {
   return (
     <div className="flex flex-col flex-1 min-h-0">
-      <SectionHeader title="Expedientes - TX Psicoterapia TBE" />
+      <SectionHeader title="Expedientes - TX Psicoterapia TBE" titleClassName="text-4xl" />
+      <div className="h-2 bg-[#1E2A3A]" />
       <ExpedienteSubHeader pacienteId={params.id} />
 
       <div className="flex-1 flex flex-col items-center justify-center p-8 gap-8">

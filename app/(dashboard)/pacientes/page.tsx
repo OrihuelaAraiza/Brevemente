@@ -35,7 +35,8 @@ export default function PacientesPage() {
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
-      <SectionHeader title="Pacientes" />
+      <SectionHeader title="Pacientes" titleClassName="text-4xl" />
+      <div className="h-2 bg-[#1E2A3A]" />
 
       <div className="flex-1 p-5 overflow-auto">
         {/* Toolbar */}

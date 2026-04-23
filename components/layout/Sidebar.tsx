@@ -166,6 +166,14 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 <Icon size={18} className="flex-shrink-0" />
               ) : null}
               {!collapsed && <span className="truncate">{item.label}</span>}
+
+              {/* Notification dot */}
+              {item.label === "Notificaciones" && (
+                <span className={cn(
+                  "absolute bg-[#F97316] rounded-full ring-2 ring-[#1E2A3A]",
+                  collapsed ? "top-1.5 right-2 w-2.5 h-2.5" : "top-2 left-[1.6rem] w-2 h-2"
+                )} />
+              )}
             </Link>
           );
 

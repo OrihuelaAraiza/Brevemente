@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { use, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { ChevronLeft, ChevronRight, Plus, MoreHorizontal } from "lucide-react";
@@ -33,7 +33,12 @@ function BrifiIconSmall() {
   );
 }
 
-export default function SesionesPage({ params }: { params: { id: string } }) {
+export default function SesionesPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = use(params);
   const searchParams = useSearchParams();
   const modo = searchParams.get("modo") ?? "ia";
   const esManual = modo === "manual";
@@ -99,7 +104,7 @@ export default function SesionesPage({ params }: { params: { id: string } }) {
       <SectionHeader title="Expedientes - TX Psicoterapia TBE - sesiones" />
 
       <ExpedienteSubHeader
-        pacienteId={params.id}
+        pacienteId={id}
         controls={
           <>
             {/* Play/Stop button */}

@@ -225,6 +225,74 @@ export const mockProtocolos = [
   { id: 32, nombre: "Protocolo Adicciones: conductas compulsivas digitales",                   descripcion: "Para uso problemático de pantallas, redes sociales y videojuegos. Trabajo con refuerzo variable, identidad digital y regulación de dopamina comportamental." },
 ];
 
+// ─── Manuales TBE ─────────────────────────────────────────────────────────────
+export const mockManuales = [
+  { id: 1, nombre: "Manual General TBE",                                    descripcion: "Fundamentos teóricos de la Terapia Breve Estratégica: modelo interaccional, estrategias generales y protocolos base."                               },
+  { id: 2, nombre: "Manual Trastorno Obsesivo Compulsivo TBE",              descripcion: "Fundamentos y conceptos esenciales para el tratamiento de TOC desde el enfoque estratégico."                                                          },
+  { id: 3, nombre: "Manual Trastornos de la Conducta Alimentaria TBE",      descripcion: "Abordaje estratégico de anorexia, bulimia, atracón y vomiting syndrome. Protocolos y reestructuraciones específicas."                              },
+  { id: 4, nombre: "Manual Trastornos Depresivos TBE",                      descripcion: "Los cuatro tipos de depresión según el modelo estratégico. Protocolos diferenciales y reestructuraciones clave."                                      },
+  { id: 5, nombre: "Manual Trastornos de Ansiedad TBE",                     descripcion: "Ansiedad generalizada, social, fobias específicas. Lógica del síntoma y estrategias rompe-escalada."                                                  },
+  { id: 6, nombre: "Manual Trastornos de Angustia TBE",                     descripcion: "Ataque de pánico, miedo a perder el control, agorafobia. Protocolos WF y diario de abordo."                                                         },
+  { id: 7, nombre: "Manual Trastornos Sexuales TBE",                        descripcion: "Disfunciones sexuales masculinas y femeninas. Ansiedad de desempeño, aversión y parafilias. Prescripciones de síntoma."                          },
+  { id: 8, nombre: "Manual Trastornos de la Personalidad TBE",              descripcion: "Organizaciones de personalidad desde el modelo estratégico. Intervención en rasgos evitadores, dependientes, obsesivos y paranoicos."             },
+];
+
+// ─── CIE-11 (extracto) ────────────────────────────────────────────────────────
+export const mockCIE11 = [
+  { codigo: "6A00",  nombre: "Trastornos del desarrollo intelectual"                                          },
+  { codigo: "6A02",  nombre: "Trastorno del espectro autista"                                                 },
+  { codigo: "6A05",  nombre: "Trastorno por déficit de atención e hiperactividad (TDAH)"                      },
+  { codigo: "6A20",  nombre: "Esquizofrenia"                                                                  },
+  { codigo: "6A60",  nombre: "Trastorno bipolar tipo I"                                                       },
+  { codigo: "6A70",  nombre: "Episodio depresivo único"                                                       },
+  { codigo: "6A71",  nombre: "Trastorno depresivo recurrente"                                                 },
+  { codigo: "6A72",  nombre: "Trastorno distímico"                                                            },
+  { codigo: "6B00",  nombre: "Trastorno de ansiedad generalizada"                                             },
+  { codigo: "6B01",  nombre: "Trastorno de pánico"                                                            },
+  { codigo: "6B02",  nombre: "Agorafobia"                                                                     },
+  { codigo: "6B03",  nombre: "Fobia específica"                                                               },
+  { codigo: "6B04",  nombre: "Trastorno de ansiedad social"                                                   },
+  { codigo: "6B20",  nombre: "Trastorno obsesivo-compulsivo"                                                  },
+  { codigo: "6B40",  nombre: "Trastorno de estrés postraumático"                                              },
+  { codigo: "6B41",  nombre: "Trastorno de estrés postraumático complejo"                                     },
+  { codigo: "6B60",  nombre: "Trastorno de síntomas somáticos"                                                },
+  { codigo: "6B80",  nombre: "Anorexia nerviosa"                                                              },
+  { codigo: "6B81",  nombre: "Bulimia nerviosa"                                                               },
+  { codigo: "6B82",  nombre: "Trastorno por atracón"                                                          },
+  { codigo: "6C40",  nombre: "Trastornos debidos al consumo de alcohol"                                       },
+  { codigo: "6C50",  nombre: "Trastornos debidos a comportamientos adictivos"                                 },
+  { codigo: "6D10",  nombre: "Trastorno de personalidad"                                                      },
+  { codigo: "6E20",  nombre: "Trastornos mentales asociados al embarazo, parto y puerperio"                   },
+];
+
+// ─── DSM-5TR (extracto) ───────────────────────────────────────────────────────
+export const mockDSM5TR = [
+  { codigo: "F32.x",  nombre: "Trastorno depresivo mayor, episodio único"                       },
+  { codigo: "F33.x",  nombre: "Trastorno depresivo mayor, recurrente"                            },
+  { codigo: "F34.1",  nombre: "Trastorno depresivo persistente (distimia)"                       },
+  { codigo: "F31.x",  nombre: "Trastorno bipolar I"                                              },
+  { codigo: "F31.81", nombre: "Trastorno bipolar II"                                             },
+  { codigo: "F41.1",  nombre: "Trastorno de ansiedad generalizada"                               },
+  { codigo: "F41.0",  nombre: "Trastorno de pánico"                                              },
+  { codigo: "F40.00", nombre: "Agorafobia"                                                        },
+  { codigo: "F40.1",  nombre: "Trastorno de ansiedad social"                                     },
+  { codigo: "F40.2xx", nombre: "Fobia específica"                                                 },
+  { codigo: "F42.x",  nombre: "Trastorno obsesivo-compulsivo"                                    },
+  { codigo: "F43.10", nombre: "Trastorno de estrés postraumático"                                },
+  { codigo: "F43.0",  nombre: "Trastorno de estrés agudo"                                        },
+  { codigo: "F45.1",  nombre: "Trastorno de síntomas somáticos"                                  },
+  { codigo: "F45.21", nombre: "Trastorno de ansiedad por la enfermedad"                          },
+  { codigo: "F50.01", nombre: "Anorexia nerviosa, tipo restrictivo"                              },
+  { codigo: "F50.02", nombre: "Anorexia nerviosa, tipo atracones/purgas"                         },
+  { codigo: "F50.2",  nombre: "Bulimia nerviosa"                                                  },
+  { codigo: "F50.81", nombre: "Trastorno por atracón"                                            },
+  { codigo: "F10.2x", nombre: "Trastorno por consumo de alcohol"                                 },
+  { codigo: "F60.2",  nombre: "Trastorno de personalidad antisocial"                             },
+  { codigo: "F60.3",  nombre: "Trastorno de personalidad límite"                                 },
+  { codigo: "F60.6",  nombre: "Trastorno de personalidad evitativa"                              },
+  { codigo: "F60.7",  nombre: "Trastorno de personalidad dependiente"                            },
+];
+
 // ─── Conversaciones Brifi ─────────────────────────────────────────────────────
 export const mockConversaciones = [
   { id: "conv1", titulo: "PX del paranoico" },

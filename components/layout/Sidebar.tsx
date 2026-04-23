@@ -1,15 +1,23 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, Users, CalendarDays, FolderOpen, BarChart2,
   Smile, Trophy, Bell, User, Wrench, Settings, LogOut,
+  type LucideIcon,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/lib/auth";
+import { ROLE_ROUTES } from "@/lib/nav";
 
-const navItems = [
+type NavEntry =
+  | { divider: true }
+  | { href: string; icon: LucideIcon | null; label: string; isBrifi?: boolean };
+
+const ALL_NAV_ITEMS: NavEntry[] = [
   { href: "/inicio",     icon: LayoutDashboard, label: "Inicio"              },
   { href: "/pacientes",  icon: Users,           label: "Pacientes"           },
   { href: "/agenda",     icon: CalendarDays,    label: "Agenda"              },
@@ -24,7 +32,7 @@ const navItems = [
   { href: "/soporte",    icon: Wrench,          label: "Soporte Técnico"     },
   { href: "/configuracion", icon: Settings,     label: "Configuración"       },
   { href: "/salir",      icon: LogOut,          label: "Salir"               },
-] as const;
+];
 
 // SVG sphere/neuron logo icon
 function LogoIcon() {
@@ -82,11 +90,27 @@ interface SidebarProps {
 
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const pathname = usePathname();
+  const { user } = useAuth();
 
   function isActive(href: string) {
     if (href === "/expedientes") return pathname.startsWith("/expedientes");
     return pathname === href || pathname.startsWith(href + "/");
   }
+
+  // Filter nav by the current user's role and collapse consecutive dividers.
+  const allowed = user ? new Set(ROLE_ROUTES[user.role]) : null;
+  const filtered: NavEntry[] = [];
+  for (const item of ALL_NAV_ITEMS) {
+    if ("divider" in item) {
+      if (filtered.length > 0 && !("divider" in filtered[filtered.length - 1])) {
+        filtered.push(item);
+      }
+      continue;
+    }
+    if (!allowed || allowed.has(item.href)) filtered.push(item);
+  }
+  while (filtered.length > 0 && "divider" in filtered[filtered.length - 1]) filtered.pop();
+  const navItems = filtered;
 
   return (
     <aside
@@ -96,10 +120,19 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       )}
     >
       {/* Logo */}
-      <div className="flex items-center gap-3 px-4 py-5 border-b border-white/10">
-        <LogoIcon />
-        {!collapsed && (
-          <span className="font-bold text-lg tracking-tight whitespace-nowrap">BreveMente</span>
+      <div className="flex items-center justify-center px-4 py-4 border-b border-white/10 h-16">
+        {collapsed ? (
+          <LogoIcon />
+        ) : (
+          <Image
+            src="/brand/logo-brevemente-horizontal-on-blue.png"
+            alt="BreveMente"
+            width={180}
+            height={36}
+            priority
+            style={{ height: "auto" }}
+            className="w-auto max-h-9 object-contain"
+          />
         )}
       </div>
 
@@ -111,7 +144,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           }
 
           const active = isActive(item.href);
-          const Icon = (item as any).icon;
+          const Icon = item.icon;
 
           const inner = (
             <Link
@@ -127,7 +160,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
               {active && !collapsed && (
                 <span className="absolute left-0 top-1 bottom-1 w-0.5 bg-[#F5A623] rounded-full" />
               )}
-              {(item as any).isBrifi ? (
+              {item.isBrifi ? (
                 <BrifiIcon size={18} />
               ) : Icon ? (
                 <Icon size={18} className="flex-shrink-0" />

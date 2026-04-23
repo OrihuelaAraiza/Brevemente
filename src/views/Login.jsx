@@ -27,6 +27,110 @@ const INITIAL_FORM = {
   password: "",
 };
 
+const DEMO_USERS = [
+  {
+    role: "ADMIN",
+    label: "Admin",
+    email: "admin@brevemente.mx",
+    password: "admin123",
+    color: "#1E2A3A",
+  },
+  {
+    role: "PROFESSIONAL",
+    label: "Profesional",
+    email: "profesional@brevemente.mx",
+    password: "pro123",
+    color: "#2563EB",
+  },
+  {
+    role: "ASSISTANT",
+    label: "Asistente",
+    email: "asistente@brevemente.mx",
+    password: "asis123",
+    color: "#9333EA",
+  },
+  {
+    role: "PATIENT",
+    label: "Paciente",
+    email: "paciente@brevemente.mx",
+    password: "pac123",
+    color: "#16A34A",
+  },
+];
+
+function DemoUsersPanel({ onPick }) {
+  return (
+    <div
+      style={{
+        marginTop: "1.25rem",
+        padding: "0.9rem 1rem",
+        borderRadius: 12,
+        background: "rgba(30, 42, 58, 0.04)",
+        border: "1px dashed rgba(30, 42, 58, 0.25)",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "0.6rem",
+          fontSize: "0.85rem",
+          fontWeight: 600,
+          color: "#1E2A3A",
+        }}
+      >
+        <span>Usuarios demo</span>
+        <span
+          style={{
+            fontWeight: 500,
+            fontSize: "0.7rem",
+            opacity: 0.7,
+          }}
+        >
+          Click para autocompletar
+        </span>
+      </div>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+          gap: "0.5rem",
+        }}
+      >
+        {DEMO_USERS.map((u) => (
+          <button
+            key={u.role}
+            type="button"
+            onClick={() => onPick(u.email, u.password)}
+            style={{
+              textAlign: "left",
+              padding: "0.55rem 0.7rem",
+              borderRadius: 8,
+              border: "1px solid rgba(30, 42, 58, 0.15)",
+              background: "#fff",
+              cursor: "pointer",
+              fontSize: "0.78rem",
+              lineHeight: 1.2,
+              display: "flex",
+              flexDirection: "column",
+              gap: 2,
+            }}
+          >
+            <span style={{ fontWeight: 600, color: u.color }}>
+              {u.label}
+            </span>
+            <span style={{ color: "#4B5563" }}>{u.email}</span>
+            <span style={{ color: "#9CA3AF", fontSize: "0.7rem" }}>
+              pass: {u.password}
+            </span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 const EMPTY_ERRORS = Object.freeze({});
 const BLOCK_INITIAL_STATE = Object.freeze({ blocked: false, remainingMs: 0 });
 
@@ -327,6 +431,14 @@ export default function Login() {
                 {displayedError}
               </p>
             ) : null}
+
+            <DemoUsersPanel
+              onPick={(email, password) => {
+                setForm({ email, password });
+                setErrors(EMPTY_ERRORS);
+                setFormError("");
+              }}
+            />
 
             <div
               className="register"

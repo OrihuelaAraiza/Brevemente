@@ -105,6 +105,10 @@ export default function SesionesPage({
 
       <ExpedienteSubHeader
         pacienteId={id}
+        breadcrumbs={[
+          { label: "TX Psicoterapia TBE", href: `/expedientes/${id}/tx-psicoterapia` },
+          { label: "Sesiones" },
+        ]}
         controls={
           <>
             {/* Play/Stop button */}

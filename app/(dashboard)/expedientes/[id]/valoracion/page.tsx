@@ -11,7 +11,13 @@ export default async function ValoracionPage({
   return (
     <div className="flex flex-col flex-1 min-h-0">
       <SectionHeader title="Expedientes - TX Psicoterapia TBE - VC" />
-      <ExpedienteSubHeader pacienteId={id} />
+      <ExpedienteSubHeader
+        pacienteId={id}
+        breadcrumbs={[
+          { label: "TX Psicoterapia TBE", href: `/expedientes/${id}/tx-psicoterapia` },
+          { label: "Valoración del Cambio" },
+        ]}
+      />
       <div className="flex-1 overflow-auto p-5">
         <ValoracionCambio />
       </div>

@@ -10,7 +10,6 @@ import {
   REPORTS,
   ORDERS,
   CONSENTS,
-  DASHBOARD_STATS,
   AUDIT_LOGS,
   CLINICAL_HISTORY,
   findUserByCredentials,
@@ -64,14 +63,74 @@ function firstMatch(path, routes) {
 
 // ---------- handlers por método ----------
 
+const statsBody = {
+  patientsActive: PATIENTS.filter((p) => p.status === "ACTIVE").length,
+  sessionsToday: 2,
+  sessionsCancelledToday: 0,
+  prescriptionsActive: PRESCRIPTIONS.length,
+  lastPrescriptionTime: "2026-03-28T10:00:00Z",
+  reportsGenerated: REPORTS.length,
+  reportsProgress: 65,
+};
+
+const todaySessions = SESSIONS.filter((s) => s.status === "SCHEDULED" || s.status === "CONFIRMED").slice(0, 5);
+
+const recentNotes = NOTES.map((n) => ({
+  id: n.id,
+  patientId: n.patientId,
+  patientName: PATIENTS.find((p) => p.id === n.patientId)?.name || "Paciente",
+  closedAt: n.createdAt,
+}));
+
+const recentPrescriptions = PRESCRIPTIONS.map((rx) => ({
+  id: rx.id,
+  patientId: rx.patientId,
+  patientName: rx.patientName,
+  folio: `RX-${rx.id.slice(-4).toUpperCase()}`,
+  signedAt: rx.createdAt,
+}));
+
+const incompleteHistories = [
+  {
+    id: "p-3",
+    patientId: "p-3",
+    patientName: "Ricardo Pérez López",
+    completionPercentage: 35,
+    missingFieldsCount: 8,
+    lastUpdated: "2024-11-20T14:15:00Z",
+  },
+  {
+    id: "p-4",
+    patientId: "p-4",
+    patientName: "Elena Torres Navarro",
+    completionPercentage: 60,
+    missingFieldsCount: 4,
+    lastUpdated: "2025-03-18T11:00:00Z",
+  },
+];
+
 const GET_ROUTES = [
   ["/health", () => ({ ok: true, version: "mock-demo" })],
-  ["/dashboard/stats", () => DASHBOARD_STATS],
-  ["/dashboard", () => ({ stats: DASHBOARD_STATS, sessions: SESSIONS.slice(0, 5) })],
+
+  // ---------- Dashboard ----------
+  ["/dashboard/stats", () => statsBody],
+  ["/dashboard/sessions/today", () => todaySessions],
+  ["/dashboard/notes/recent", () => recentNotes],
+  ["/dashboard/prescriptions/recent", () => recentPrescriptions],
+  ["/dashboard/histories/incomplete", () => incompleteHistories],
+  ["/dashboard", () => ({ stats: statsBody, sessions: todaySessions })],
+
+  // ---------- Patients ----------
   ["/patients", () => ({ items: PATIENTS, total: PATIENTS.length })],
+  ["/patients/global/search", () => ({ items: PATIENTS })],
   [
     "/patients/:id",
-    (p) => PATIENTS.find((x) => x.id === p.id) || { id: p.id, name: "Paciente", notFound: true },
+    (p) =>
+      PATIENTS.find((x) => x.id === p.id) || {
+        id: p.id,
+        name: "Paciente",
+        notFound: true,
+      },
   ],
   [
     "/patients/:id/history",
@@ -98,37 +157,105 @@ const GET_ROUTES = [
     (p) => ({ items: PRESCRIPTIONS.filter((x) => x.patientId === p.id) }),
   ],
   [
-    "/patients/:id/documents",
-    () => ({ items: [] }),
+    "/patients/:id/orders",
+    (p) => ({ items: ORDERS.filter((o) => o.patientId === p.id) }),
   ],
+  [
+    "/patients/:id/bundle",
+    (p) => ({
+      patient: PATIENTS.find((x) => x.id === p.id) || null,
+      history: CLINICAL_HISTORY[p.id] || null,
+      notes: NOTES.filter((n) => n.patientId === p.id),
+      sessions: SESSIONS.filter((s) => s.patientId === p.id),
+      prescriptions: PRESCRIPTIONS.filter((x) => x.patientId === p.id),
+      consents: CONSENTS.filter((c) => c.patientId === p.id),
+    }),
+  ],
+  ["/patients/:id/documents", () => ({ items: [] })],
+  ["/patients/:id/attachments", () => ({ items: [] })],
+
+  // ---------- Histories ----------
+  [
+    "/histories/patient/:patientId",
+    (p) => CLINICAL_HISTORY[p.patientId] || { patientId: p.patientId, data: {} },
+  ],
+
+  // ---------- Sessions ----------
   ["/sessions", () => ({ items: SESSIONS })],
   ["/sessions/calendar", () => ({ items: SESSIONS })],
   [
-    "/sessions/:id",
-    (p) => SESSIONS.find((s) => s.id === p.id) || null,
+    "/sessions/today-counts",
+    () => ({
+      total: todaySessions.length,
+      scheduled: todaySessions.filter((s) => s.status === "SCHEDULED").length,
+      confirmed: todaySessions.filter((s) => s.status === "CONFIRMED").length,
+      cancelled: 0,
+    }),
   ],
+  [
+    "/sessions/patient/:patientId",
+    (p) => ({ items: SESSIONS.filter((s) => s.patientId === p.patientId) }),
+  ],
+  ["/sessions/:id", (p) => SESSIONS.find((s) => s.id === p.id) || null],
+  ["/sessions/:id/ics", () => "BEGIN:VCALENDAR\nEND:VCALENDAR"],
+
+  // ---------- Notes ----------
   ["/notes", () => ({ items: NOTES })],
+  [
+    "/notes/patient/:patientId",
+    (p) => ({ items: NOTES.filter((n) => n.patientId === p.patientId) }),
+  ],
   ["/notes/:id", (p) => NOTES.find((n) => n.id === p.id) || null],
-  ["/prescriptions", () => ({ items: PRESCRIPTIONS })],
+
+  // ---------- Prescriptions ----------
+  ["/prescriptions", () => PRESCRIPTIONS],
+  ["/prescriptions/my-prescriptions", () => PRESCRIPTIONS],
+  [
+    "/prescriptions/detail/:id",
+    (p) => PRESCRIPTIONS.find((x) => x.id === p.id) || null,
+  ],
   [
     "/prescriptions/:id",
     (p) => PRESCRIPTIONS.find((x) => x.id === p.id) || null,
   ],
+
+  // ---------- Reports & Orders ----------
   ["/reports", () => ({ items: REPORTS })],
-  [
-    "/reports/:id",
-    (p) => REPORTS.find((r) => r.id === p.id) || null,
-  ],
+  ["/reports/:id", (p) => REPORTS.find((r) => r.id === p.id) || null],
   ["/orders", () => ({ items: ORDERS })],
-  [
-    "/orders/:id",
-    (p) => ORDERS.find((o) => o.id === p.id) || null,
-  ],
+  ["/orders/:id", (p) => ORDERS.find((o) => o.id === p.id) || null],
+
+  // ---------- Consents ----------
   ["/consents", () => ({ items: CONSENTS })],
+
+  // ---------- Audit / Supervision ----------
   ["/audit/logs", () => ({ items: AUDIT_LOGS })],
+  ["/audit/professional", () => ({ items: AUDIT_LOGS })],
+  ["/supervision", () => ({ items: AUDIT_LOGS })],
   ["/supervision/logs", () => ({ items: AUDIT_LOGS })],
-  ["/professional/me", () => USERS.find((u) => u.role === "PROFESSIONAL")],
+  ["/supervision/:id", (p) => AUDIT_LOGS.find((a) => a.id === p.id) || null],
+
+  // ---------- Profiles / Me ----------
+  [
+    "/professional/me",
+    () => USERS.find((u) => u.role === "PROFESSIONAL"),
+  ],
+  ["/professional/profile", () => USERS.find((u) => u.role === "PROFESSIONAL")],
   ["/me", () => USERS.find((u) => u.role === "PROFESSIONAL")],
+  [
+    "/profiles/list-professionals",
+    () => ({
+      items: USERS.filter((u) => u.role === "PROFESSIONAL"),
+    }),
+  ],
+  ["/delegates/count", () => ({ count: 0 })],
+
+  // ---------- Paciente ----------
+  [
+    "/patient/my-therapists",
+    () => ({ items: USERS.filter((u) => u.role === "PROFESSIONAL") }),
+  ],
+  ["/patient/profile", () => USERS.find((u) => u.role === "PATIENT")],
 ];
 
 const POST_ROUTES = [

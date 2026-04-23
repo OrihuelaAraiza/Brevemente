@@ -10,7 +10,13 @@ export default async function DxEstrategicoPage({
   return (
     <div className="flex flex-col flex-1 min-h-0">
       <SectionHeader title="Expedientes - TX Psicoterapia TBE - DX Estratégico" />
-      <ExpedienteSubHeader pacienteId={id} />
+      <ExpedienteSubHeader
+        pacienteId={id}
+        breadcrumbs={[
+          { label: "TX Psicoterapia TBE", href: `/expedientes/${id}/tx-psicoterapia` },
+          { label: "DX. Estratégico" },
+        ]}
+      />
       <div className="flex-1 overflow-auto p-5">
         <div className="bg-white rounded-xl shadow-sm p-6">
           <h2 className="font-bold text-[#1E2A3A] mb-4">Diagnóstico Estratégico</h2>

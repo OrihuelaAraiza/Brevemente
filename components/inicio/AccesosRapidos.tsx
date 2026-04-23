@@ -40,7 +40,7 @@ const cards = [
   {
     icon: ClipboardList,
     label: "Generar Bitácora Supervisión",
-    href: "/reportes",
+    href: "/bitacora",
     tooltip: null,
   },
 ];

@@ -1,36 +1,82 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BreveMente
 
-## Getting Started
+Plataforma clínica BreveMente en una sola aplicación Next.js 16. Sin backend — todo corre con datos hardcodeados persistidos en `localStorage`.
 
-First, run the development server:
+## Requisitos
+
+- Node.js ≥ 20.9
+
+## Correr
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+nvm use 20.20.1
+npm install
+npm run dev    # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Dos superficies en la misma app
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 1. Marketing/demo Brevemente
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Páginas Next.js App Router bajo `app/(dashboard)/`:
+`/inicio`, `/agenda`, `/pacientes`, `/expedientes/*`, `/brifi`, `/biblioteca`, `/reportes`, `/desempeno`, `/configuracion`, `/cuenta`, `/bitacora`, `/beneficios`, etc.
 
-## Learn More
+Stack: TypeScript · Tailwind v4 · shadcn/ui (base-ui) · FullCalendar · Framer Motion.
 
-To learn more about Next.js, take a look at the following resources:
+### 2. Plataforma clínica Klinia (SPA) bajo `/platform/*`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+SPA React + React Router v7 que vive en `src/`, montada como catch-all en `app/platform/[[...slug]]/page.tsx`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Rutas principales:
 
-## Deploy on Vercel
+| Ruta | Quién entra |
+|---|---|
+| `/platform/login` | pública |
+| `/platform/dashboard` | admin / profesional / asistente / paciente |
+| `/platform/patients` · `/platform/patients/:id` | staff + paciente |
+| `/platform/sessions` · `/platform/sessions/calendar` | staff + paciente |
+| `/platform/patients/:id/notes/*` | staff clínico |
+| `/platform/prescriptions` · `/platform/prescriptions/:id` | profesional / admin |
+| `/platform/reports` | staff |
+| `/platform/supervision` | admin |
+| `/platform/patient/dashboard` · `/platform/patient/clinical-history` · `/platform/patient/notes` · `/platform/patient/sessions` · `/platform/patient/prescriptions` · `/platform/patient/documents` · `/platform/patient/profile` | paciente |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Usuarios demo
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Desde el login hay una tarjeta por rol — click para autocompletar.
+
+| Rol | Email | Password |
+|---|---|---|
+| Admin | `admin@brevemente.mx` | `admin123` |
+| Profesional | `profesional@brevemente.mx` | `pro123` |
+| Asistente | `asistente@brevemente.mx` | `asis123` |
+| Paciente | `paciente@brevemente.mx` | `pac123` |
+
+## Datos mock persistentes
+
+- Semilla en [src/mocks/data.js](src/mocks/data.js)
+- Tienda con persistencia en `localStorage` en [src/mocks/store.js](src/mocks/store.js)
+- Adaptador HTTP en [src/services/apiClient.js](src/services/apiClient.js) que simula los endpoints REST y ruta a la tienda
+
+Lo que creas durante la demo (pacientes, sesiones, notas, recetas, reportes, órdenes, firmas de consentimiento, historia clínica) **se guarda** y sigue ahí al refrescar.
+
+**Resetear demo**: botón "Restablecer demo" en el login o en consola:
+
+```js
+window.__BREVE_DEMO__.reset();
+location.reload();
+```
+
+## Aliases TypeScript
+
+- `@/*` → raíz del repo (código Brevemente TS)
+- `@src/*` → `./src/*` (código Klinia JS)
+
+## Scripts
+
+```bash
+npm run dev      # Turbopack dev server
+npm run build    # Compila y typechecks
+npm run start    # Sirve el build
+npm run lint     # ESLint
+```

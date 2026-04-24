@@ -11,6 +11,43 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { generatePdf } from "@/lib/pdf-export";
+
+async function exportConstancia(tipo: "psiquiatrico" | "psicoterapeutico") {
+  // Recoge valores del form activo a partir de los inputs/textareas del documento.
+  const root = document.querySelector<HTMLElement>("[data-constancia]");
+  const fields: Array<{ label: string; value: string }> = [];
+  if (root) {
+    root.querySelectorAll<HTMLElement>("[data-field]").forEach((el) => {
+      const label = el.getAttribute("data-field") ?? "";
+      const input = el.querySelector<HTMLInputElement | HTMLTextAreaElement>("input, textarea");
+      if (label && input) {
+        fields.push({ label, value: input.value || "—" });
+      }
+    });
+  }
+
+  await generatePdf({
+    title:
+      tipo === "psicoterapeutico"
+        ? "Constancia de asistencia a terapia psicológica"
+        : "Constancia psiquiátrica",
+    subtitle: `Emitida por BreveMente · ${new Date().toLocaleDateString("es-MX")}`,
+    sections: [
+      {
+        title: "Datos de la constancia",
+        fields,
+      },
+      {
+        title: "Aviso legal",
+        body:
+          "Este documento tiene validez únicamente para certificar la asistencia a las sesiones. " +
+          "Toda información relacionada con el diagnóstico, tratamiento o evolución del paciente está sujeta al secreto profesional según el Código Ético del Psicólogo de la Sociedad Mexicana de Psicología y la Ley General de Salud.",
+      },
+    ],
+    filename: `constancia-${tipo}-${Date.now()}.pdf`,
+  });
+}
 
 function BrifiIconSmall() {
   return (
@@ -86,7 +123,15 @@ export default function ReportesPage() {
               <Upload size={16} />
             </button>
             <button
-              onClick={() => toast.success("Exportado como PDF.")}
+              onClick={async () => {
+                try {
+                  await exportConstancia(tipo as "psiquiatrico" | "psicoterapeutico");
+                  toast.success("PDF generado y descargado.");
+                } catch (err) {
+                  toast.error("No se pudo generar el PDF.");
+                  console.error(err);
+                }
+              }}
               className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors"
               title="Exportar PDF"
             >
@@ -145,7 +190,7 @@ export default function ReportesPage() {
 function Field({ label, defaultValue = "", textarea = false, rows = 2 }: { label: string; defaultValue?: string; textarea?: boolean; rows?: number }) {
   if (textarea) {
     return (
-      <div>
+      <div data-field={label}>
         <label className="text-xs font-medium text-gray-500 block mb-1">{label}</label>
         <textarea
           defaultValue={defaultValue}
@@ -156,7 +201,7 @@ function Field({ label, defaultValue = "", textarea = false, rows = 2 }: { label
     );
   }
   return (
-    <div>
+    <div data-field={label}>
       <label className="text-xs font-medium text-gray-500 block mb-1">{label}</label>
       <input
         defaultValue={defaultValue}
@@ -168,7 +213,7 @@ function Field({ label, defaultValue = "", textarea = false, rows = 2 }: { label
 
 function ConstanciaPsicoterapeutica({ onBack }: { onBack: () => void }) {
   return (
-    <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-sm p-8 space-y-6">
+    <div data-constancia className="max-w-3xl mx-auto bg-white rounded-xl shadow-sm p-8 space-y-6">
       <div className="flex items-center justify-between border-b border-gray-100 pb-3">
         <h2 className="font-bold text-[#1E2A3A]">Constancia - Reporte de asistencia a terapia psicológica</h2>
         <button onClick={onBack} className="text-xs text-gray-500 hover:text-[#1E2A3A]">Cambiar tipo</button>
@@ -248,7 +293,7 @@ function ConstanciaPsicoterapeutica({ onBack }: { onBack: () => void }) {
 
 function ConstanciaPsiquiatrica({ onBack }: { onBack: () => void }) {
   return (
-    <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-sm p-8 space-y-6">
+    <div data-constancia className="max-w-3xl mx-auto bg-white rounded-xl shadow-sm p-8 space-y-6">
       <div className="flex items-center justify-between border-b border-gray-100 pb-3">
         <h2 className="font-bold text-[#1E2A3A]">Constancia - Reporte psiquiátrico</h2>
         <button onClick={onBack} className="text-xs text-gray-500 hover:text-[#1E2A3A]">Cambiar tipo</button>

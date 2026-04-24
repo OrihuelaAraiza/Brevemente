@@ -1,22 +1,34 @@
-// Mock apiClient: devuelve datos hardcodeados (sin backend)
-// Mantiene la misma interfaz que el apiClient real para no tocar services.
+// Mock apiClient respaldado por tienda con persistencia en localStorage.
+// Mantiene la misma firma que el apiClient real para no tocar services.
+// Cualquier mutación (crear paciente, nota, sesión, etc.) persiste al refrescar.
 
-import {
+import store, {
+  hydrateFromStorage,
+  getAll,
+  createPatient,
+  updatePatient,
+  deletePatient,
+  createSession,
+  updateSession,
+  updateSessionStatus,
+  createNote,
+  updateNote,
+  closeNote,
+  signNote,
+  appendNoteAddendum,
+  createPrescription,
+  suspendPrescription,
+  createReport,
+  createOrder,
+  cancelOrder,
+  signConsent,
+  setClinicalHistory,
+  getClinicalHistoryFor,
   USERS,
-  PATIENTS,
-  SESSIONS,
-  NOTES,
-  PRESCRIPTIONS,
-  REPORTS,
-  ORDERS,
-  CONSENTS,
-  AUDIT_LOGS,
-  CLINICAL_HISTORY,
-  findUserByCredentials,
-  findUserByEmail,
-} from "../mocks/data";
+} from "../mocks/store";
+import { findUserByCredentials, findUserByEmail } from "../mocks/data";
 
-function delay(ms = 120) {
+function delay(ms = 80) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
@@ -36,11 +48,22 @@ function trimBody(body) {
   return body;
 }
 
-function matchPath(pattern, path) {
-  const p = path.split("?")[0].replace(/\/$/, "");
+function splitPath(path) {
+  const [pathname, qs = ""] = String(path || "").split("?");
+  const query = {};
+  qs.split("&")
+    .filter(Boolean)
+    .forEach((pair) => {
+      const [k, v = ""] = pair.split("=");
+      query[decodeURIComponent(k)] = decodeURIComponent(v);
+    });
+  return { pathname: pathname.replace(/\/$/, ""), query };
+}
+
+function matchPath(pattern, pathname) {
   const pat = pattern.replace(/\/$/, "");
   const patParts = pat.split("/").filter(Boolean);
-  const pParts = p.split("/").filter(Boolean);
+  const pParts = pathname.split("/").filter(Boolean);
   if (patParts.length !== pParts.length) return null;
   const params = {};
   for (let i = 0; i < patParts.length; i++) {
@@ -53,80 +76,119 @@ function matchPath(pattern, path) {
   return params;
 }
 
-function firstMatch(path, routes) {
+function firstMatch(pathname, routes) {
   for (const [pattern, handler] of routes) {
-    const params = matchPath(pattern, path);
+    const params = matchPath(pattern, pathname);
     if (params !== null) return { handler, params };
   }
   return null;
 }
 
-// ---------- handlers por método ----------
+// ---------- Dashboard derivados ----------
+function buildStats() {
+  const patients = getAll.patients();
+  const sessions = getAll.sessions();
+  const reports = getAll.reports();
+  const prescriptions = getAll.prescriptions();
 
-const statsBody = {
-  patientsActive: PATIENTS.filter((p) => p.status === "ACTIVE").length,
-  sessionsToday: 2,
-  sessionsCancelledToday: 0,
-  prescriptionsActive: PRESCRIPTIONS.length,
-  lastPrescriptionTime: "2026-03-28T10:00:00Z",
-  reportsGenerated: REPORTS.length,
-  reportsProgress: 65,
-};
+  const today = new Date().toISOString().slice(0, 10);
+  const isToday = (iso) =>
+    iso && String(iso).slice(0, 10) === today;
 
-const todaySessions = SESSIONS.filter((s) => s.status === "SCHEDULED" || s.status === "CONFIRMED").slice(0, 5);
+  return {
+    patientsActive: patients.filter((p) => p.status === "ACTIVE").length,
+    sessionsToday: sessions.filter(
+      (s) => isToday(s.scheduledAt) && s.status !== "CANCELLED",
+    ).length,
+    sessionsCancelledToday: sessions.filter(
+      (s) => isToday(s.scheduledAt) && s.status === "CANCELLED",
+    ).length,
+    prescriptionsActive: prescriptions.filter((p) => p.status === "ACTIVE")
+      .length,
+    lastPrescriptionTime: prescriptions[0]?.createdAt || null,
+    reportsGenerated: reports.length,
+    reportsProgress: 65,
+  };
+}
 
-const recentNotes = NOTES.map((n) => ({
-  id: n.id,
-  patientId: n.patientId,
-  patientName: PATIENTS.find((p) => p.id === n.patientId)?.name || "Paciente",
-  closedAt: n.createdAt,
-}));
+function todaySessionsList() {
+  return getAll
+    .sessions()
+    .filter((s) => s.status === "SCHEDULED" || s.status === "CONFIRMED")
+    .slice(0, 8)
+    .map((s) => ({
+      id: s.id,
+      time: s.scheduledAt,
+      patientName: s.patientName,
+      status: s.status,
+    }));
+}
 
-const recentPrescriptions = PRESCRIPTIONS.map((rx) => ({
-  id: rx.id,
-  patientId: rx.patientId,
-  patientName: rx.patientName,
-  folio: `RX-${rx.id.slice(-4).toUpperCase()}`,
-  signedAt: rx.createdAt,
-}));
+function recentNotesList() {
+  return getAll
+    .notes()
+    .slice(0, 8)
+    .map((n) => ({
+      id: n.id,
+      patientId: n.patientId,
+      patientName:
+        getAll.patients().find((p) => p.id === n.patientId)?.name ||
+        "Paciente",
+      closedAt: n.closedAt || n.createdAt,
+    }));
+}
 
-const incompleteHistories = [
-  {
-    id: "p-3",
-    patientId: "p-3",
-    patientName: "Ricardo Pérez López",
-    completionPercentage: 35,
-    missingFieldsCount: 8,
-    lastUpdated: "2024-11-20T14:15:00Z",
-  },
-  {
-    id: "p-4",
-    patientId: "p-4",
-    patientName: "Elena Torres Navarro",
-    completionPercentage: 60,
-    missingFieldsCount: 4,
-    lastUpdated: "2025-03-18T11:00:00Z",
-  },
-];
+function recentPrescriptionsList() {
+  return getAll
+    .prescriptions()
+    .slice(0, 8)
+    .map((rx) => ({
+      id: rx.id,
+      patientId: rx.patientId,
+      patientName: rx.patientName,
+      folio: rx.folio || `RX-${rx.id.slice(-4).toUpperCase()}`,
+      signedAt: rx.createdAt,
+    }));
+}
 
+function incompleteHistoriesList() {
+  const patients = getAll.patients();
+  const history = getAll.history();
+  return patients
+    .filter((p) => !history[p.id])
+    .slice(0, 5)
+    .map((p, i) => ({
+      id: p.id,
+      patientId: p.id,
+      patientName: p.name,
+      completionPercentage: 30 + i * 10,
+      missingFieldsCount: 6 - i,
+      lastUpdated: p.createdAt,
+    }));
+}
+
+// ---------- RUTAS GET ----------
 const GET_ROUTES = [
   ["/health", () => ({ ok: true, version: "mock-demo" })],
 
-  // ---------- Dashboard ----------
-  ["/dashboard/stats", () => statsBody],
-  ["/dashboard/sessions/today", () => todaySessions],
-  ["/dashboard/notes/recent", () => recentNotes],
-  ["/dashboard/prescriptions/recent", () => recentPrescriptions],
-  ["/dashboard/histories/incomplete", () => incompleteHistories],
-  ["/dashboard", () => ({ stats: statsBody, sessions: todaySessions })],
+  // Dashboard
+  ["/dashboard/stats", () => buildStats()],
+  ["/dashboard/sessions/today", () => todaySessionsList()],
+  ["/dashboard/notes/recent", () => recentNotesList()],
+  ["/dashboard/prescriptions/recent", () => recentPrescriptionsList()],
+  ["/dashboard/histories/incomplete", () => incompleteHistoriesList()],
+  [
+    "/dashboard",
+    () => ({ stats: buildStats(), sessions: todaySessionsList() }),
+  ],
 
-  // ---------- Patients ----------
-  ["/patients", () => ({ items: PATIENTS, total: PATIENTS.length })],
-  ["/patients/global/search", () => ({ items: PATIENTS })],
+  // Patients
+  ["/patients", () => ({ items: getAll.patients(), total: getAll.patients().length })],
+  ["/patients/global/search", () => ({ items: getAll.patients() })],
   [
     "/patients/:id",
     (p) =>
-      PATIENTS.find((x) => x.id === p.id) || {
+      getAll.patients().find((x) => x.id === p.id) || {
         id: p.id,
         name: "Paciente",
         notFound: true,
@@ -134,123 +196,132 @@ const GET_ROUTES = [
   ],
   [
     "/patients/:id/history",
-    (p) => CLINICAL_HISTORY[p.id] || { patientId: p.id, data: {} },
+    (p) => getClinicalHistoryFor(p.id) || { patientId: p.id, data: {} },
   ],
   [
     "/patients/:id/sessions",
-    (p) => ({ items: SESSIONS.filter((s) => s.patientId === p.id) }),
+    (p) => ({ items: getAll.sessions().filter((s) => s.patientId === p.id) }),
   ],
   [
     "/patients/:id/notes",
-    (p) => ({ items: NOTES.filter((n) => n.patientId === p.id) }),
+    (p) => ({ items: getAll.notes().filter((n) => n.patientId === p.id) }),
   ],
   [
     "/patients/:id/consents",
-    (p) => ({ items: CONSENTS.filter((c) => c.patientId === p.id) }),
+    (p) => ({ items: getAll.consents().filter((c) => c.patientId === p.id) }),
   ],
   [
     "/patients/:id/reports",
-    (p) => ({ items: REPORTS.filter((r) => r.patientId === p.id) }),
+    (p) => ({ items: getAll.reports().filter((r) => r.patientId === p.id) }),
   ],
   [
     "/patients/:id/prescriptions",
-    (p) => ({ items: PRESCRIPTIONS.filter((x) => x.patientId === p.id) }),
+    (p) => ({
+      items: getAll.prescriptions().filter((x) => x.patientId === p.id),
+    }),
   ],
   [
     "/patients/:id/orders",
-    (p) => ({ items: ORDERS.filter((o) => o.patientId === p.id) }),
+    (p) => ({ items: getAll.orders().filter((o) => o.patientId === p.id) }),
   ],
   [
     "/patients/:id/bundle",
     (p) => ({
-      patient: PATIENTS.find((x) => x.id === p.id) || null,
-      history: CLINICAL_HISTORY[p.id] || null,
-      notes: NOTES.filter((n) => n.patientId === p.id),
-      sessions: SESSIONS.filter((s) => s.patientId === p.id),
-      prescriptions: PRESCRIPTIONS.filter((x) => x.patientId === p.id),
-      consents: CONSENTS.filter((c) => c.patientId === p.id),
+      patient: getAll.patients().find((x) => x.id === p.id) || null,
+      history: getClinicalHistoryFor(p.id),
+      notes: getAll.notes().filter((n) => n.patientId === p.id),
+      sessions: getAll.sessions().filter((s) => s.patientId === p.id),
+      prescriptions: getAll
+        .prescriptions()
+        .filter((x) => x.patientId === p.id),
+      consents: getAll.consents().filter((c) => c.patientId === p.id),
     }),
   ],
   ["/patients/:id/documents", () => ({ items: [] })],
   ["/patients/:id/attachments", () => ({ items: [] })],
 
-  // ---------- Histories ----------
+  // Histories
   [
     "/histories/patient/:patientId",
-    (p) => CLINICAL_HISTORY[p.patientId] || { patientId: p.patientId, data: {} },
+    (p) => getClinicalHistoryFor(p.patientId) || { patientId: p.patientId, data: {} },
   ],
 
-  // ---------- Sessions ----------
-  ["/sessions", () => ({ items: SESSIONS })],
-  ["/sessions/calendar", () => ({ items: SESSIONS })],
+  // Sessions
+  ["/sessions", () => ({ items: getAll.sessions() })],
+  ["/sessions/calendar", () => ({ items: getAll.sessions() })],
   [
     "/sessions/today-counts",
-    () => ({
-      total: todaySessions.length,
-      scheduled: todaySessions.filter((s) => s.status === "SCHEDULED").length,
-      confirmed: todaySessions.filter((s) => s.status === "CONFIRMED").length,
-      cancelled: 0,
-    }),
+    () => {
+      const today = todaySessionsList();
+      return {
+        total: today.length,
+        scheduled: today.filter((s) => s.status === "SCHEDULED").length,
+        confirmed: today.filter((s) => s.status === "CONFIRMED").length,
+        cancelled: 0,
+      };
+    },
   ],
   [
     "/sessions/patient/:patientId",
-    (p) => ({ items: SESSIONS.filter((s) => s.patientId === p.patientId) }),
+    (p) => ({
+      items: getAll.sessions().filter((s) => s.patientId === p.patientId),
+    }),
   ],
-  ["/sessions/:id", (p) => SESSIONS.find((s) => s.id === p.id) || null],
+  [
+    "/sessions/:id",
+    (p) => getAll.sessions().find((s) => s.id === p.id) || null,
+  ],
   ["/sessions/:id/ics", () => "BEGIN:VCALENDAR\nEND:VCALENDAR"],
 
-  // ---------- Notes ----------
-  ["/notes", () => ({ items: NOTES })],
+  // Notes
+  ["/notes", () => ({ items: getAll.notes() })],
   [
     "/notes/patient/:patientId",
-    (p) => ({ items: NOTES.filter((n) => n.patientId === p.patientId) }),
+    (p) => ({ items: getAll.notes().filter((n) => n.patientId === p.patientId) }),
   ],
-  ["/notes/:id", (p) => NOTES.find((n) => n.id === p.id) || null],
+  ["/notes/:id", (p) => getAll.notes().find((n) => n.id === p.id) || null],
 
-  // ---------- Prescriptions ----------
-  ["/prescriptions", () => PRESCRIPTIONS],
-  ["/prescriptions/my-prescriptions", () => PRESCRIPTIONS],
+  // Prescriptions
+  ["/prescriptions", (_p, _b, q) => {
+    const items = getAll.prescriptions();
+    if (q?.id) return items.filter((x) => x.patientId === q.id);
+    return items;
+  }],
+  ["/prescriptions/my-prescriptions", () => getAll.prescriptions()],
   [
     "/prescriptions/detail/:id",
-    (p) => PRESCRIPTIONS.find((x) => x.id === p.id) || null,
+    (p) => getAll.prescriptions().find((x) => x.id === p.id) || null,
   ],
   [
     "/prescriptions/:id",
-    (p) => PRESCRIPTIONS.find((x) => x.id === p.id) || null,
+    (p) => getAll.prescriptions().find((x) => x.id === p.id) || null,
   ],
 
-  // ---------- Reports & Orders ----------
-  ["/reports", () => ({ items: REPORTS })],
-  ["/reports/:id", (p) => REPORTS.find((r) => r.id === p.id) || null],
-  ["/orders", () => ({ items: ORDERS })],
-  ["/orders/:id", (p) => ORDERS.find((o) => o.id === p.id) || null],
+  // Reports & Orders
+  ["/reports", () => ({ items: getAll.reports() })],
+  ["/reports/:id", (p) => getAll.reports().find((r) => r.id === p.id) || null],
+  ["/orders", () => ({ items: getAll.orders() })],
+  ["/orders/:id", (p) => getAll.orders().find((o) => o.id === p.id) || null],
 
-  // ---------- Consents ----------
-  ["/consents", () => ({ items: CONSENTS })],
+  // Consents / Audit / Supervision
+  ["/consents", () => ({ items: getAll.consents() })],
+  ["/audit/logs", () => ({ items: getAll.audit() })],
+  ["/audit/professional", () => ({ items: getAll.audit() })],
+  ["/supervision", () => ({ items: getAll.audit() })],
+  ["/supervision/logs", () => ({ items: getAll.audit() })],
+  ["/supervision/:id", (p) => getAll.audit().find((a) => a.id === p.id) || null],
 
-  // ---------- Audit / Supervision ----------
-  ["/audit/logs", () => ({ items: AUDIT_LOGS })],
-  ["/audit/professional", () => ({ items: AUDIT_LOGS })],
-  ["/supervision", () => ({ items: AUDIT_LOGS })],
-  ["/supervision/logs", () => ({ items: AUDIT_LOGS })],
-  ["/supervision/:id", (p) => AUDIT_LOGS.find((a) => a.id === p.id) || null],
-
-  // ---------- Profiles / Me ----------
-  [
-    "/professional/me",
-    () => USERS.find((u) => u.role === "PROFESSIONAL"),
-  ],
+  // Profiles / Me
+  ["/professional/me", () => USERS.find((u) => u.role === "PROFESSIONAL")],
   ["/professional/profile", () => USERS.find((u) => u.role === "PROFESSIONAL")],
   ["/me", () => USERS.find((u) => u.role === "PROFESSIONAL")],
   [
     "/profiles/list-professionals",
-    () => ({
-      items: USERS.filter((u) => u.role === "PROFESSIONAL"),
-    }),
+    () => ({ items: USERS.filter((u) => u.role === "PROFESSIONAL") }),
   ],
   ["/delegates/count", () => ({ count: 0 })],
 
-  // ---------- Paciente ----------
+  // Paciente
   [
     "/patient/my-therapists",
     () => ({ items: USERS.filter((u) => u.role === "PROFESSIONAL") }),
@@ -258,7 +329,9 @@ const GET_ROUTES = [
   ["/patient/profile", () => USERS.find((u) => u.role === "PATIENT")],
 ];
 
+// ---------- RUTAS POST ----------
 const POST_ROUTES = [
+  // Auth
   [
     "/auth/login",
     (_params, body) => {
@@ -285,17 +358,7 @@ const POST_ROUTES = [
       return { status: "LOGIN_SUCCESS", token: token(user), user: safe };
     },
   ],
-  [
-    "/auth/register",
-    (_params, body) => {
-      if (!body.email) {
-        const err = new Error("Correo requerido");
-        err.status = 400;
-        throw err;
-      }
-      return { ok: true, message: "Registro recibido (demo)." };
-    },
-  ],
+  ["/auth/register", () => ({ ok: true, message: "Registro recibido (demo)." })],
   [
     "/auth/register/complete",
     (_params, body) => {
@@ -316,82 +379,113 @@ const POST_ROUTES = [
   ["/auth/logout", () => ({ ok: true })],
   ["/auth/forgot-password", () => ({ ok: true, message: "Demo: correo enviado." })],
   ["/auth/reset-password", () => ({ ok: true })],
-  ["/audit/log", () => ({ ok: true })],
+  ["/audit/log", (_p, body) => ({ ok: true, logged: body })],
+
+  // Patients
+  ["/patients", (_p, body) => createPatient(body)],
   [
-    "/patients",
-    (_params, body) => ({
-      id: `p-${Date.now()}`,
-      ...body,
-      createdAt: new Date().toISOString(),
-      status: "ACTIVE",
-    }),
+    "/patients/:id/discharge",
+    (p, body) =>
+      updatePatient(p.id, {
+        status: "DISCHARGED",
+        dischargeReason: body.reason,
+        dischargedAt: new Date().toISOString(),
+      }),
   ],
   [
-    "/sessions",
-    (_params, body) => ({
-      id: `s-${Date.now()}`,
-      ...body,
-      status: body.status || "SCHEDULED",
-    }),
+    "/patients/:id/re-entry",
+    (p) => updatePatient(p.id, { status: "ACTIVE" }),
   ],
   [
-    "/notes",
-    (_params, body) => ({
-      id: `n-${Date.now()}`,
-      ...body,
-      createdAt: new Date().toISOString(),
-    }),
+    "/patients/:id/consents",
+    (p, body) => signConsent(p.id, body.type),
+  ],
+
+  // Histories
+  [
+    "/histories/patient/:patientId",
+    (p, body) => setClinicalHistory(p.patientId, body),
+  ],
+
+  // Sessions
+  ["/sessions", (_p, body) => createSession(body)],
+  ["/sessions/:id/status", (p, body) => updateSessionStatus(p.id, body.status)],
+  ["/sessions/:id/link-note", () => ({ ok: true })],
+
+  // Notes
+  ["/notes", (_p, body) => createNote(body)],
+  ["/notes/:patientId/:noteId/close", (p) => closeNote(p.noteId)],
+  ["/notes/:patientId/:noteId/sign", (p) => signNote(p.noteId)],
+  [
+    "/notes/:patientId/:noteId/addendum",
+    (p, body) => appendNoteAddendum(p.noteId, body.text),
+  ],
+
+  // Prescriptions
+  ["/prescriptions", (_p, body) => createPrescription(body)],
+  [
+    "/prescriptions/detail/:id/suspend",
+    (p) => suspendPrescription(p.id),
+  ],
+
+  // Reports & Orders
+  ["/reports", (_p, body) => createReport(body)],
+  [
+    "/reports/:id/lock",
+    (p) => ({ id: p.id, status: "LOCKED", lockedAt: new Date().toISOString() }),
+  ],
+  ["/orders", (_p, body) => createOrder(body)],
+  ["/patients/:patientId/orders", (p, body) =>
+    createOrder({ ...body, patientId: p.patientId }),
   ],
   [
-    "/prescriptions",
-    (_params, body) => ({
-      id: `rx-${Date.now()}`,
-      ...body,
-      createdAt: new Date().toISOString(),
-      status: "ACTIVE",
-    }),
+    "/patients/:patientId/reports",
+    (p, body) => createReport({ ...body, patientId: p.patientId }),
   ],
-  [
-    "/reports",
-    (_params, body) => ({
-      id: `r-${Date.now()}`,
-      ...body,
-      createdAt: new Date().toISOString(),
-      status: "FINAL",
-    }),
-  ],
-  [
-    "/orders",
-    (_params, body) => ({
-      id: `o-${Date.now()}`,
-      ...body,
-      createdAt: new Date().toISOString(),
-      status: "PENDING",
-    }),
-  ],
+  ["/orders/:id/cancel", (p) => cancelOrder(p.id)],
+];
+
+// ---------- RUTAS PUT ----------
+const PUT_ROUTES = [
+  ["/patients/:id", (p, body) => updatePatient(p.id, body)],
+  ["/sessions/:id", (p, body) => updateSession(p.id, body)],
+  ["/notes/:id", (p, body) => updateNote(p.id, body)],
+];
+
+// ---------- RUTAS DELETE ----------
+const DELETE_ROUTES = [
+  ["/patients/:id", (p) => deletePatient(p.id)],
 ];
 
 async function request(path, options = {}) {
+  if (typeof window !== "undefined") {
+    hydrateFromStorage();
+  }
+
   const method = (options.method || "GET").toUpperCase();
   const body = trimBody(options.body);
+  const { pathname, query } = splitPath(path);
 
   await delay();
 
-  const routes =
-    method === "POST" || method === "PUT" || method === "PATCH"
-      ? POST_ROUTES
-      : GET_ROUTES;
+  let routes;
+  if (method === "GET") routes = GET_ROUTES;
+  else if (method === "POST" || method === "PATCH") routes = POST_ROUTES;
+  else if (method === "PUT") routes = PUT_ROUTES;
+  else if (method === "DELETE") routes = DELETE_ROUTES;
+  else routes = [];
 
-  const match = firstMatch(path, routes);
+  const match = firstMatch(pathname, routes);
   if (!match) {
     if (method === "DELETE") return { ok: true };
-    // Por default regresa objeto vacío
+    if (method === "POST" || method === "PUT" || method === "PATCH") {
+      return { ok: true };
+    }
     return {};
   }
   try {
-    return match.handler(match.params, body);
+    return match.handler(match.params, body, query);
   } catch (err) {
-    // Simula fetch fail
     throw err;
   }
 }
@@ -407,4 +501,5 @@ export const api = {
   delete: (path, opts) => request(path, { ...(opts || {}), method: "DELETE" }),
 };
 
+export { store };
 export default api;

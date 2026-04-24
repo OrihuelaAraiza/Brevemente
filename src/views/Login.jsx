@@ -59,6 +59,17 @@ const DEMO_USERS = [
 ];
 
 function DemoUsersPanel({ onPick }) {
+  const handleReset = () => {
+    try {
+      window.__BREVE_DEMO__?.reset();
+      Object.keys(window.localStorage)
+        .filter((k) => k.startsWith("brevemente."))
+        .forEach((k) => window.localStorage.removeItem(k));
+      window.location.reload();
+    } catch {
+      /* empty */
+    }
+  };
   return (
     <div
       style={{
@@ -81,15 +92,24 @@ function DemoUsersPanel({ onPick }) {
         }}
       >
         <span>Usuarios demo</span>
-        <span
+        <button
+          type="button"
+          onClick={handleReset}
           style={{
             fontWeight: 500,
             fontSize: "0.7rem",
             opacity: 0.7,
+            background: "transparent",
+            border: "none",
+            textDecoration: "underline",
+            cursor: "pointer",
+            padding: 0,
+            color: "#1E2A3A",
           }}
+          title="Borra pacientes, sesiones y notas creados durante la demo"
         >
-          Click para autocompletar
-        </span>
+          Restablecer demo
+        </button>
       </div>
       <div
         style={{

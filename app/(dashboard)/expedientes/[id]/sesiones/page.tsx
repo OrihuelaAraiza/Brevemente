@@ -8,8 +8,9 @@ import { SectionHeader } from "@/components/layout/SectionHeader";
 import { ExpedienteSubHeader } from "@/components/expedientes/ExpedienteSubHeader";
 import { CriterioDropdown } from "@/components/expedientes/CriterioDropdown";
 import { GrabacionOverlay } from "@/components/expedientes/GrabacionOverlay";
+import { SesionEditorManual } from "@/components/expedientes/SesionEditorManual";
 import {
-  mockSesiones, expedienteSecciones, allCampoKeys, getCriterioColor,
+  mockSesiones, expedienteSecciones, allCampoKeys,
   type CampoKey, type Sesion,
 } from "@/lib/mock-data";
 
@@ -48,6 +49,7 @@ export default function SesionesPage({
   const [mostrarBrifi, setMostrarBrifi] = useState(false);
   const [llenandoIA, setLlenandoIA]   = useState(false);
   const [activeSesion, setActiveSesion] = useState<number>(3);  // current session being recorded
+  const [editorManual, setEditorManual] = useState<Sesion | null>(null);
 
   function handleCriterioChange(sesionId: string, campo: CampoKey, criterio: string) {
     setSesiones((prev) =>
@@ -160,10 +162,21 @@ export default function SesionesPage({
           {sesiones.map((sesion) => (
             <div key={sesion.id} className="bg-white rounded-xl shadow-sm w-56 flex-shrink-0 overflow-hidden">
               {/* Session header */}
-              <div className="bg-[#1E2A3A] text-white px-4 py-2">
-                <p className="font-bold text-sm">Sesión {sesion.numero}</p>
-                <p className="text-xs text-white/70">{sesion.fecha}</p>
-                <p className="text-xs text-white/70">Fase: {sesion.fase}</p>
+              <div className="bg-[#1E2A3A] text-white px-4 py-2 flex items-start justify-between">
+                <div>
+                  <p className="font-bold text-sm">Sesión {sesion.numero}</p>
+                  <p className="text-xs text-white/70">{sesion.fecha}</p>
+                  <p className="text-xs text-white/70">Fase: {sesion.fase}</p>
+                </div>
+                {esManual && (
+                  <button
+                    onClick={() => setEditorManual(sesion)}
+                    className="text-[10px] text-[#F5A623] hover:text-white font-semibold uppercase tracking-wide"
+                    title="Editar en modo manual"
+                  >
+                    Editar
+                  </button>
+                )}
               </div>
 
               {/* Fields */}
@@ -210,6 +223,17 @@ export default function SesionesPage({
       {/* Grabación overlay */}
       {grabando && (
         <GrabacionOverlay sesionNumero={activeSesion} onComplete={handleStop} />
+      )}
+
+      {/* Editor manual de sesión */}
+      {editorManual && (
+        <SesionEditorManual
+          open={!!editorManual}
+          onClose={() => setEditorManual(null)}
+          sesionNumero={editorManual.numero}
+          fecha={editorManual.fecha}
+          fase={editorManual.fase}
+        />
       )}
 
       {/* Brifi rellena button */}

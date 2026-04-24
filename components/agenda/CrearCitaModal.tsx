@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { MessageCircle, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,22 +15,58 @@ interface CrearCitaModalProps {
   defaultDate?: Date;
 }
 
+const MOTIVOS = [
+  "Primera consulta",
+  "Seguimiento",
+  "Supervisión",
+  "Reevaluación",
+  "Urgencia",
+  "Cierre de tratamiento",
+];
+
+const ETIQUETAS_DISPONIBLES = [
+  "Primera vez",
+  "Control",
+  "Emergencia",
+  "Pareja",
+  "Familia",
+  "Adolescente",
+  "Adulto mayor",
+];
+
 export function CrearCitaModal({ open, onClose, defaultDate }: CrearCitaModalProps) {
   const [pacienteInput, setPacienteInput] = useState("");
   const [videoconferencia, setVideoconferencia] = useState(false);
   const [modalidad, setModalidad] = useState("");
   const [estatus, setEstatus] = useState("programada");
   const [notas, setNotas] = useState("");
+  const [seguro, setSeguro] = useState("");
+  const [poliza, setPoliza] = useState("");
+  const [motivo, setMotivo] = useState<string>(MOTIVOS[1]);
+  const [etiquetas, setEtiquetas] = useState<string[]>([]);
   const [showNuevoPaciente, setShowNuevoPaciente] = useState(false);
   const [nuevoPacienteNombre, setNuevoPacienteNombre] = useState("");
 
-  const nombresTodos = mockPacientes.map((p) => `${p.nombre} ${p.apellido}`);
-  const matcheExistente = pacienteInput.trim().length > 0
-    && nombresTodos.some((n) => n.toLowerCase().includes(pacienteInput.toLowerCase()));
-  const esNuevo = pacienteInput.trim().length > 2 && !matcheExistente;
+  const pacienteEncontrado = useMemo(() => {
+    const q = pacienteInput.trim().toLowerCase();
+    if (q.length < 2) return null;
+    return (
+      mockPacientes.find((p) =>
+        `${p.nombre} ${p.apellido}`.toLowerCase().includes(q),
+      ) ?? null
+    );
+  }, [pacienteInput]);
+
+  const esNuevo = pacienteInput.trim().length > 2 && !pacienteEncontrado;
+
+  function toggleEtiqueta(etq: string) {
+    setEtiquetas((prev) =>
+      prev.includes(etq) ? prev.filter((e) => e !== etq) : [...prev, etq],
+    );
+  }
 
   function handleGuardar() {
-    toast.success("✅ Cita guardada correctamente.");
+    toast.success("Cita guardada (demo).");
     onClose();
   }
 
@@ -37,16 +74,37 @@ export function CrearCitaModal({ open, onClose, defaultDate }: CrearCitaModalPro
     if (esNuevo) {
       setNuevoPacienteNombre(pacienteInput);
       setShowNuevoPaciente(true);
-    } else {
-      toast.success("📨 Formulario enviado al paciente.");
-      onClose();
+      return;
     }
+    if (!pacienteEncontrado) {
+      toast.error("Selecciona un paciente existente o crea uno nuevo.");
+      return;
+    }
+
+    // Arma mensaje de WhatsApp con link al formulario de Historia Clínica
+    const origin =
+      typeof window !== "undefined" ? window.location.origin : "https://brevemente.mx";
+    const link = `${origin}/formulario-hc?paz=${encodeURIComponent(
+      pacienteEncontrado.id,
+    )}`;
+    const texto = encodeURIComponent(
+      `Hola ${pacienteEncontrado.nombre}, tu cita fue agendada en BreveMente. ` +
+        `Completa tu historia clínica aquí antes de la sesión: ${link}`,
+    );
+    const telefono = (pacienteEncontrado.telefono || "").replace(/\D/g, "");
+    const waUrl = telefono
+      ? `https://wa.me/${telefono}?text=${texto}`
+      : `https://wa.me/?text=${texto}`;
+
+    window.open(waUrl, "_blank", "noopener,noreferrer");
+    toast.success("Abriendo WhatsApp para enviar el formulario…");
+    onClose();
   }
 
   return (
     <>
       <Dialog open={open} onOpenChange={onClose}>
-        <DialogContent className="max-w-sm">
+        <DialogContent className="max-w-sm max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-[#1E2A3A]">Crear cita</DialogTitle>
           </DialogHeader>
@@ -90,12 +148,21 @@ export function CrearCitaModal({ open, onClose, defaultDate }: CrearCitaModalPro
                 placeholder="Buscar paciente..."
                 className="mt-1"
               />
+              {pacienteEncontrado && (
+                <p className="mt-1 text-xs text-emerald-700">
+                  ✓ {pacienteEncontrado.nombre} {pacienteEncontrado.apellido} ·{" "}
+                  {pacienteEncontrado.telefono || "sin teléfono"}
+                </p>
+              )}
               {esNuevo && (
                 <button
                   className="mt-1 text-xs text-[#F5A623] font-medium hover:underline"
-                  onClick={() => { setNuevoPacienteNombre(pacienteInput); setShowNuevoPaciente(true); }}
+                  onClick={() => {
+                    setNuevoPacienteNombre(pacienteInput);
+                    setShowNuevoPaciente(true);
+                  }}
                 >
-                  + Agregar nuevo paciente: "{pacienteInput}"
+                  + Agregar nuevo paciente: &quot;{pacienteInput}&quot;
                 </button>
               )}
             </div>
@@ -112,6 +179,70 @@ export function CrearCitaModal({ open, onClose, defaultDate }: CrearCitaModalPro
                 <option value="online">Online</option>
                 <option value="supervision">Supervisión</option>
               </select>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="text-xs text-gray-600 font-medium">Seguro / plan médico</label>
+                <select
+                  value={seguro}
+                  onChange={(e) => setSeguro(e.target.value)}
+                  className="mt-1 w-full border border-gray-200 rounded-md px-3 py-2 text-sm text-gray-700 focus:outline-none"
+                >
+                  <option value="">Particular</option>
+                  <option>AXA Keralty</option>
+                  <option>GNP</option>
+                  <option>MetLife</option>
+                  <option>Mapfre</option>
+                  <option>Allianz</option>
+                  <option>IMSS Bienestar</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-xs text-gray-600 font-medium">Póliza / afiliación</label>
+                <Input
+                  value={poliza}
+                  onChange={(e) => setPoliza(e.target.value)}
+                  placeholder="No. de póliza"
+                  className="mt-1"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs text-gray-600 font-medium">Motivo de cita</label>
+              <select
+                value={motivo}
+                onChange={(e) => setMotivo(e.target.value)}
+                className="mt-1 w-full border border-gray-200 rounded-md px-3 py-2 text-sm text-gray-700 focus:outline-none"
+              >
+                {MOTIVOS.map((m) => (
+                  <option key={m}>{m}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="text-xs text-gray-600 font-medium">Etiquetas</label>
+              <div className="mt-1 flex flex-wrap gap-1">
+                {ETIQUETAS_DISPONIBLES.map((etq) => {
+                  const on = etiquetas.includes(etq);
+                  return (
+                    <button
+                      key={etq}
+                      onClick={() => toggleEtiqueta(etq)}
+                      className={`text-[11px] px-2 py-0.5 rounded-full border transition-colors ${
+                        on
+                          ? "bg-[#5BC8E8] text-white border-[#5BC8E8]"
+                          : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+                      }`}
+                    >
+                      {etq}
+                      {on && <X size={10} className="inline ml-1" />}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             <div>
@@ -145,9 +276,10 @@ export function CrearCitaModal({ open, onClose, defaultDate }: CrearCitaModalPro
             </Button>
             <Button
               onClick={handleEnviarFormulario}
-              className="flex-1 text-xs bg-[#F5A623] hover:bg-[#E09515] text-white border-0"
+              className="flex-1 text-xs bg-[#25D366] hover:bg-[#1DA851] text-white border-0 inline-flex items-center gap-1.5"
+              title="Enviar historia clínica por WhatsApp"
             >
-              Enviar formulario →
+              <MessageCircle size={14} /> Enviar por WhatsApp
             </Button>
           </div>
         </DialogContent>
@@ -155,7 +287,10 @@ export function CrearCitaModal({ open, onClose, defaultDate }: CrearCitaModalPro
 
       <NuevoPacienteModal
         open={showNuevoPaciente}
-        onClose={() => { setShowNuevoPaciente(false); onClose(); }}
+        onClose={() => {
+          setShowNuevoPaciente(false);
+          onClose();
+        }}
         nombreInicial={nuevoPacienteNombre}
       />
     </>

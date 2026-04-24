@@ -9,20 +9,20 @@ import {
 } from "@/components/expedientes/SeccionExpedienteShell";
 import { mockPacientes } from "@/lib/mock-data";
 
+// Alineado con los catálogos clínicos oficiales (DISCHARGE_REASONS / CASE_RESULTS)
 const motivos = [
-  "Alta terapéutica (objetivos alcanzados)",
-  "Abandono del tratamiento",
-  "Derivación a otro profesional",
-  "Mudanza / cambio de ciudad",
-  "Cambio de modalidad",
-  "Otro",
+  { value: "OBJETIVOS_CUMPLIDOS", label: "Objetivos cumplidos" },
+  { value: "ALTA_VOLUNTARIA",     label: "Alta voluntaria" },
+  { value: "ABANDONO",            label: "Abandono / Deserción" },
+  { value: "REFERENCIA",          label: "Referencia a otro especialista" },
+  { value: "OTRO",                label: "Otro" },
 ];
 
 const resoluciones = [
-  { key: "resuelto",   label: "Caso resuelto"    },
-  { key: "mejorado",   label: "Caso mejorado"    },
-  { key: "invariable", label: "Caso invariable"  },
-  { key: "dropout",    label: "Drop out"         },
+  { value: "RESUELTO",  label: "Caso resuelto" },
+  { value: "MEJORADO",  label: "Caso mejorado" },
+  { value: "EMPEORADO", label: "Caso empeorado" },
+  { value: "DROP_OUT",  label: "Drop out (Abandono)" },
 ];
 
 export default function CierrePage({
@@ -36,8 +36,8 @@ export default function CierrePage({
   if (!paciente) notFound();
 
   const [form, setForm] = useState({
-    motivo: motivos[0],
-    resolucion: "resuelto",
+    motivo: motivos[0].value,
+    resolucion: resoluciones[0].value,
     fechaCierre: new Date().toISOString().slice(0, 10),
     sesionesTotales: "12",
     observacionFinal: "La paciente logra mantener rutinas sin episodios de pánico durante las últimas 6 semanas.",
@@ -65,15 +65,17 @@ export default function CierrePage({
       </div>
 
       <Seccion titulo="Motivo del cierre">
-        <Campo label="Motivo">
+        <Campo label="Motivo del cierre">
           <Select value={form.motivo} onChange={(e) => set("motivo", e.target.value)}>
-            {motivos.map((m) => <option key={m}>{m}</option>)}
+            {motivos.map((m) => (
+              <option key={m.value} value={m.value}>{m.label}</option>
+            ))}
           </Select>
         </Campo>
         <Campo label="Resolución del caso">
           <Select value={form.resolucion} onChange={(e) => set("resolucion", e.target.value)}>
             {resoluciones.map((r) => (
-              <option key={r.key} value={r.key}>{r.label}</option>
+              <option key={r.value} value={r.value}>{r.label}</option>
             ))}
           </Select>
         </Campo>

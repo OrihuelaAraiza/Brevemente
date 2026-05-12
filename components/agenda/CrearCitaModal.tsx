@@ -83,12 +83,12 @@ export function CrearCitaModal({ open, onClose, defaultDate }: CrearCitaModalPro
 
     // Arma mensaje de WhatsApp con link al formulario de Historia Clínica
     const origin =
-      typeof window !== "undefined" ? window.location.origin : "https://brevemente.mx";
+      typeof window !== "undefined" ? window.location.origin : "https://romimente.mx";
     const link = `${origin}/formulario-hc?paz=${encodeURIComponent(
       pacienteEncontrado.id,
     )}`;
     const texto = encodeURIComponent(
-      `Hola ${pacienteEncontrado.nombre}, tu cita fue agendada en BreveMente. ` +
+      `Hola ${pacienteEncontrado.nombre}, tu cita fue agendada en Romi Mente. ` +
         `Completa tu historia clínica aquí antes de la sesión: ${link}`,
     );
     const telefono = (pacienteEncontrado.telefono || "").replace(/\D/g, "");

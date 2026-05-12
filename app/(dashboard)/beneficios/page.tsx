@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 const benefits = [
   {
     title: "Primer Expediente TBE Digital",
-    description: "BreveMente es el primer sistema en el mundo que digitaliza completamente el expediente médico basado en el modelo de Terapia Breve Estratégica.",
+    description: "Romi Mente es el primer sistema en el mundo que digitaliza completamente el expediente médico basado en el modelo de Terapia Breve Estratégica.",
     icon: FolderOpen,
     color: "bg-[#FFBF00]/20 text-[#1E2A3A]",
     gradient: "from-[#FFBF00]/20 to-transparent"
@@ -75,7 +75,7 @@ export default function Page() {
                 Eleva tu práctica al siguiente nivel con <span className="text-[#5BC8E8]">TBE</span>
               </h2>
               <p className="text-gray-500 text-lg mb-8 max-w-xl italic">
-                "BreveMente no es solo un software de gestión, es una extensión de tu mente estratégica diseñada para maximizar el cambio en cada sesión."
+                "Romi Mente no es solo un software de gestión, es una extensión de tu mente estratégica diseñada para maximizar el cambio en cada sesión."
               </p>
               <div className="flex items-center gap-6">
                 <div className="flex -space-x-3">

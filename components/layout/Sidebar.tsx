@@ -34,26 +34,16 @@ const ALL_NAV_ITEMS: NavEntry[] = [
   { href: "/salir",      icon: LogOut,          label: "Salir"               },
 ];
 
-// SVG sphere/neuron logo icon
 function LogoIcon() {
   return (
-    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <radialGradient id="sphereGrad" cx="40%" cy="35%" r="60%">
-          <stop offset="0%" stopColor="#A78BFA" />
-          <stop offset="50%" stopColor="#5BC8E8" />
-          <stop offset="100%" stopColor="#34D399" />
-        </radialGradient>
-      </defs>
-      <circle cx="14" cy="14" r="13" fill="url(#sphereGrad)" />
-      <circle cx="14" cy="14" r="4" fill="white" fillOpacity="0.9" />
-      <line x1="14" y1="2"  x2="14" y2="8"  stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-      <line x1="14" y1="20" x2="14" y2="26" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-      <line x1="2"  y1="14" x2="8"  y2="14" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-      <line x1="20" y1="14" x2="26" y2="14" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-      <line x1="4.9" y1="4.9" x2="9.2" y2="9.2" stroke="white" strokeWidth="1.2" strokeLinecap="round" />
-      <line x1="18.8" y1="18.8" x2="23.1" y2="23.1" stroke="white" strokeWidth="1.2" strokeLinecap="round" />
-    </svg>
+    <Image
+      src="/brand/romiface.png"
+      alt="Romi"
+      width={32}
+      height={32}
+      priority
+      className="object-contain"
+    />
   );
 }
 
@@ -125,8 +115,8 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           <LogoIcon />
         ) : (
           <Image
-            src="/brand/logo-brevemente-horizontal-on-blue.png"
-            alt="BreveMente"
+            src="/brand/romi-horizontal-on-blue.png"
+            alt="Romi Mente"
             width={180}
             height={36}
             priority

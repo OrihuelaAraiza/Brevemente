@@ -15,7 +15,7 @@ import {
   AUDIT_LOGS as SEED_AUDIT_LOGS,
 } from "./data";
 
-const KEY_PREFIX = "brevemente.demo.";
+const KEY_PREFIX = "romimente.demo.";
 
 const KEYS = {
   patients: KEY_PREFIX + "patients",
@@ -372,7 +372,7 @@ export function getClinicalHistoryFor(patientId) {
 
 // ---------- Exponer helper genérico para devtools ----------
 if (isBrowser()) {
-  window.__BREVE_DEMO__ = {
+  window.__ROMI_DEMO__ = {
     reset: resetStore,
     dump: () => structuredClone(memory),
   };

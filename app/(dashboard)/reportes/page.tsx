@@ -32,7 +32,7 @@ async function exportConstancia(tipo: "psiquiatrico" | "psicoterapeutico") {
       tipo === "psicoterapeutico"
         ? "Constancia de asistencia a terapia psicológica"
         : "Constancia psiquiátrica",
-    subtitle: `Emitida por BreveMente · ${new Date().toLocaleDateString("es-MX")}`,
+    subtitle: `Emitida por Romi Mente · ${new Date().toLocaleDateString("es-MX")}`,
     sections: [
       {
         title: "Datos de la constancia",

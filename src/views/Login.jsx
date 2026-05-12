@@ -31,28 +31,28 @@ const DEMO_USERS = [
   {
     role: "ADMIN",
     label: "Admin",
-    email: "admin@brevemente.mx",
+    email: "admin@romimente.mx",
     password: "admin123",
     color: "#1E2A3A",
   },
   {
     role: "PROFESSIONAL",
     label: "Profesional",
-    email: "profesional@brevemente.mx",
+    email: "profesional@romimente.mx",
     password: "pro123",
     color: "#2563EB",
   },
   {
     role: "ASSISTANT",
     label: "Asistente",
-    email: "asistente@brevemente.mx",
+    email: "asistente@romimente.mx",
     password: "asis123",
     color: "#9333EA",
   },
   {
     role: "PATIENT",
     label: "Paciente",
-    email: "paciente@brevemente.mx",
+    email: "paciente@romimente.mx",
     password: "pac123",
     color: "#16A34A",
   },
@@ -61,9 +61,9 @@ const DEMO_USERS = [
 function DemoUsersPanel({ onPick }) {
   const handleReset = () => {
     try {
-      window.__BREVE_DEMO__?.reset();
+      window.__ROMI_DEMO__?.reset();
       Object.keys(window.localStorage)
-        .filter((k) => k.startsWith("brevemente."))
+        .filter((k) => k.startsWith("romimente."))
         .forEach((k) => window.localStorage.removeItem(k));
       window.location.reload();
     } catch {
@@ -340,7 +340,7 @@ export default function Login() {
               variant="horizontal"
               size="lg"
               theme="auto"
-              alt="BreveMente"
+              alt="Romi Mente"
               className="login-logo"
             />
             <ThemeToggle className="login-theme-toggle" />
@@ -381,7 +381,7 @@ export default function Login() {
               name="email"
               autoComplete="email"
               required
-              placeholder="profesional@brevemente.mx"
+              placeholder="profesional@romimente.mx"
               error={errors.email}
             />
 
@@ -470,7 +470,7 @@ export default function Login() {
             >
               <p style={{ margin: 0 }}>
                 {userType === "professional"
-                  ? "¿Eres nuevo en BreveMente?"
+                  ? "¿Eres nuevo en Romi Mente?"
                   : "¿Primera vez aquí?"}
               </p>
 
@@ -498,7 +498,7 @@ export default function Login() {
         >
           <img
             src={doctorImg}
-            alt="Profesional de salud usando la plataforma BreveMente"
+            alt="Profesional de salud usando la plataforma Romi Mente"
             className="login-hero__image"
           />
         </Motion.aside>

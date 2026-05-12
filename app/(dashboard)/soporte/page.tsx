@@ -34,8 +34,8 @@ export default function Page() {
               </div>
               <h3 className="text-[#1E2A3A] font-bold text-lg group-hover:text-white">Correo Electrónico</h3>
               <p className="text-gray-400 text-sm mb-4 group-hover:text-white/60">Respuesta en menos de 24h</p>
-              <a href="mailto:soporte@brevemente.com" className="text-[#5BC8E8] font-bold hover:underline">
-                soporte@brevemente.com
+              <a href="mailto:soporte@romimente.com" className="text-[#5BC8E8] font-bold hover:underline">
+                soporte@romimente.com
               </a>
             </div>
 
@@ -160,7 +160,7 @@ export default function Page() {
               <div className="text-center p-4">
                 <p className="text-white/60 text-xs italic font-medium">
                   Versión del sistema: 2.4.1-stable<br/>
-                  © 2026 BreveMente Labs
+                  © 2026 Romi Mente Labs
                 </p>
               </div>
             </div>

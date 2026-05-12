@@ -11,7 +11,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "BreveMente",
+  title: "Romi Mente",
   description: "Plataforma clínica para psicólogos",
 };
 

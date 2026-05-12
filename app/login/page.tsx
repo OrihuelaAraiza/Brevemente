@@ -41,7 +41,7 @@ function LoginForm() {
       setSubmitting(false);
       return;
     }
-    toast.success("Bienvenido a BreveMente");
+    toast.success("Bienvenido a Romi Mente");
   }
 
   function fillDemo(account: (typeof DEMO_ACCOUNTS)[number]) {
@@ -64,8 +64,8 @@ function LoginForm() {
           />
           <div className="relative z-10 flex flex-col h-full justify-between">
             <Image
-              src="/brand/logo-brevemente-horizontal-on-blue.png"
-              alt="BreveMente"
+              src="/brand/romi-horizontal-on-blue.png"
+              alt="Romi Mente"
               width={240}
               height={48}
               priority
@@ -83,7 +83,7 @@ function LoginForm() {
               </p>
             </div>
 
-            <div className="text-xs text-white/40">© {new Date().getFullYear()} BreveMente</div>
+            <div className="text-xs text-white/40">© {new Date().getFullYear()} Romi Mente</div>
           </div>
         </div>
 
@@ -91,8 +91,8 @@ function LoginForm() {
         <div className="bg-white rounded-2xl shadow-2xl p-8 md:p-10 flex flex-col">
           <div className="flex items-center md:hidden mb-6">
             <Image
-              src="/brand/logo-brevemente-horizontal-dark.png"
-              alt="BreveMente"
+              src="/brand/romi-horizontal-dark.png"
+              alt="Romi Mente"
               width={180}
               height={36}
               style={{ height: "auto" }}

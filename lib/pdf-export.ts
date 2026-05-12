@@ -141,7 +141,7 @@ export async function generatePdf({
   }
 
   // Footer
-  const footer = `Generado por BreveMente · ${new Date().toLocaleString("es-MX")} · Documento de demostración`;
+  const footer = `Generado por Romi Mente · ${new Date().toLocaleString("es-MX")} · Documento de demostración`;
   page.drawText(footer, {
     x: margin,
     y: 30,

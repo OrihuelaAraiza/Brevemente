@@ -27,10 +27,10 @@ export type User = {
 type DemoAccount = User & { password: string };
 
 export const DEMO_ACCOUNTS: DemoAccount[] = [
-  { email: "admin@brevemente.com",     password: "admin123",     name: "Ana Admin",         role: "ADMIN" },
-  { email: "pro@brevemente.com",       password: "pro123",       name: "Dra. Paola Rivas",  role: "PROFESSIONAL" },
-  { email: "asistente@brevemente.com", password: "asistente123", name: "Luis Asistente",    role: "ASSISTANT" },
-  { email: "paciente@brevemente.com",  password: "paciente123",  name: "Mario Paciente",    role: "PATIENT" },
+  { email: "admin@romimente.com",     password: "admin123",     name: "Ana Admin",         role: "ADMIN" },
+  { email: "pro@romimente.com",       password: "pro123",       name: "Dra. Paola Rivas",  role: "PROFESSIONAL" },
+  { email: "asistente@romimente.com", password: "asistente123", name: "Luis Asistente",    role: "ASSISTANT" },
+  { email: "paciente@romimente.com",  password: "paciente123",  name: "Mario Paciente",    role: "PATIENT" },
 ];
 
 const STORAGE_KEY = "bm.auth.user";

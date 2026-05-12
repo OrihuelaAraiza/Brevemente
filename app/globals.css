@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  /* BreveMente brand colors */
+  /* Romi Mente brand colors */
   --color-bm-sidebar: #1E2A3A;
   --color-bm-sidebar-active: #2D3E50;
   --color-bm-content: #5BC8E8;

@@ -1,17 +1,15 @@
 import { useTheme } from "../../hooks/useTheme";
-import logoHorizontal from "../../assets/brand/logo-brevemente-horizontal.png";
-import logoVertical from "../../assets/brand/logo-brevemente-vertical.png";
-import logoHorizontalDark from "../../assets/brand/Logotipo-BreveMente_Fondo-Azul-horizontal-Transparente.png";
-import logoVerticalOnBlue from "../../assets/brand/logo-brevemente-vertical-on-blue.png";
+import logoPink from "../../assets/brand/romi_lrgpink.png";
+import logoBlack from "../../assets/brand/romi_lrgblack.png";
 
 const VARIANT_ASSET = {
     horizontal: {
-        light: logoHorizontal,
-        dark: logoHorizontalDark,
+        light: logoBlack,
+        dark: logoPink,
     },
     vertical: {
-        light: logoVertical,
-        dark: logoVerticalOnBlue,
+        light: logoBlack,
+        dark: logoPink,
     },
 };
 
@@ -25,12 +23,12 @@ export default function Logo({
     variant = "horizontal",
     size = "md",
     theme = "auto",
-    alt = "BreveMente",
+    alt = "Romi Mente",
     className = "",
 }) {
     const { theme: systemTheme } = useTheme();
     const resolvedTheme = theme === "auto" ? systemTheme : theme;
-    const asset = VARIANT_ASSET[variant]?.[resolvedTheme] || logoHorizontal;
+    const asset = VARIANT_ASSET[variant]?.[resolvedTheme] || logoPink;
     const width = SIZE_WIDTH[size] ?? SIZE_WIDTH.md;
 
     return (
@@ -43,4 +41,3 @@ export default function Logo({
         />
     );
 }
-

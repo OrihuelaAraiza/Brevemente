@@ -25,7 +25,7 @@ async function exportBitacora() {
   }
   await generatePdf({
     title: "Registro de supervisión del caso",
-    subtitle: `Bitácora BreveMente · ${new Date().toLocaleDateString("es-MX")}`,
+    subtitle: `Bitácora Romi Mente · ${new Date().toLocaleDateString("es-MX")}`,
     sections: [{ title: "Datos del registro", fields }],
     filename: `bitacora-${Date.now()}.pdf`,
   });

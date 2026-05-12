@@ -40,7 +40,7 @@ export default function Page() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex items-center gap-3 text-gray-600">
                   <Mail size={18} className="text-[#5BC8E8]" />
-                  <span className="text-sm font-medium">roberto.gomez@brevemente.com</span>
+                  <span className="text-sm font-medium">roberto.gomez@romimente.com</span>
                 </div>
                 <div className="flex items-center gap-3 text-gray-600">
                   <Phone size={18} className="text-[#5BC8E8]" />

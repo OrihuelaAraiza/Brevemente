@@ -5,7 +5,7 @@ export const USERS = [
   {
     id: "u-admin",
     name: "Sofía Admin",
-    email: "admin@brevemente.mx",
+    email: "admin@romimente.mx",
     password: "admin123",
     role: "ADMIN",
     phone: "+52 55 0000 0001",
@@ -13,7 +13,7 @@ export const USERS = [
   {
     id: "u-pro",
     name: "Dra. Ana García",
-    email: "profesional@brevemente.mx",
+    email: "profesional@romimente.mx",
     password: "pro123",
     role: "PROFESSIONAL",
     phone: "+52 55 0000 0002",
@@ -23,7 +23,7 @@ export const USERS = [
   {
     id: "u-asis",
     name: "Luis Asistente",
-    email: "asistente@brevemente.mx",
+    email: "asistente@romimente.mx",
     password: "asis123",
     role: "ASSISTANT",
     phone: "+52 55 0000 0003",
@@ -31,7 +31,7 @@ export const USERS = [
   {
     id: "u-pac",
     name: "Mariana Paciente",
-    email: "paciente@brevemente.mx",
+    email: "paciente@romimente.mx",
     password: "pac123",
     role: "PATIENT",
     phone: "+52 55 0000 0004",
